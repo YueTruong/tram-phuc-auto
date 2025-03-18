@@ -98,10 +98,10 @@ class CategoryDetail extends Component {
         axios.post('/api/admin/categories', cate, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Thêm danh mục thành công!');
                 this.apiGetCategories();
             } else {
-                alert('SORRY BABY!');
+                alert('Thêm danh mục thất bại!');
             }
         });
     }
@@ -119,10 +119,10 @@ class CategoryDetail extends Component {
         axios.put('/api/admin/categories/' + id, cate, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Cập nhật danh mục thành công!');
                 this.apiGetCategories();
             } else {
-                alert('SORRY BABY!');
+                alert('Cập nhật danh mục thất bại!');
             }
         });
     }
@@ -132,10 +132,10 @@ class CategoryDetail extends Component {
         axios.delete('/api/admin/categories/' + id, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Xóa danh mục thành công!');
                 this.apiGetCategories();
             } else {
-                alert('SORRY BABY!');
+                alert('Xóa danh mục thất bại!');
             }
         });
     }
