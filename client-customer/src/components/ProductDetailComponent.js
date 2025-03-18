@@ -11,49 +11,53 @@ class ProductDetail extends Component {
     }
     render() {
         const prod = this.state.product;
-        if (prod != null) {
-            return (
-                <div className="align-center">
-                    <h2 className="text-center">PRODUCT DETAILS</h2>
-                    <figure className="caption-right">
-                        <img src={"data:image/jpg;base64," + prod.image} width="400px" height="400px" alt="" />
-                        <figcaption>
-                            <form>
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td align="right">ID:</td>
-                                            <td>{prod._id}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Name:</td>
-                                            <td>{prod.name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Price:</td>
-                                            <td>{prod.price}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Category:</td>
-                                            <td>{prod.category.name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Quantity:</td>
-                                            <td><input type="number" min="1" max="99" /></td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td><input type="submit" value="ADD TO CART" /></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </form>
-                        </figcaption>
-                    </figure>
-                </div>
-            );
+        if (!prod) {
+            return <div className="text-center mt-5"><h4>Loading product details...</h4></div>;
         }
-        return (<div />);
+
+        return (
+            <div className="container mt-4">
+                <h2 className="text-center mb-4">PRODUCT DETAILS</h2>
+                <div className="row">
+                    <div className="col-md-6 text-center">
+                        <img 
+                            src={"data:image/jpg;base64," + prod.image} 
+                            className="img-fluid rounded shadow"
+                            alt={prod.name} 
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <table className="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>ID:</th>
+                                    <td>{prod._id}</td>
+                                </tr>
+                                <tr>
+                                    <th>Name:</th>
+                                    <td>{prod.name}</td>
+                                </tr>
+                                <tr>
+                                    <th>Price:</th>
+                                    <td className="text-primary fw-bold">${prod.price}</td>
+                                </tr>
+                                <tr>
+                                    <th>Category:</th>
+                                    <td>{prod.category.name}</td>
+                                </tr>
+                                <tr>
+                                    <th>Quantity:</th>
+                                    <td>
+                                        <input type="number" min="1" max="99" className="form-control w-50" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button className="btn btn-primary w-100 mt-3">ADD TO CART</button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     componentDidMount() {

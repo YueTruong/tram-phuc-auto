@@ -8,7 +8,7 @@ class Menu extends Component {
         return (
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container">
-                    <Link className="navbar-brand" to="/admin/home">Admin Panel</Link>
+                    <Link className="navbar-brand" to="/admin/home">Trâm Phúc Auto</Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                         <span className="navbar-toggler-icon"></span>
                     </button>

@@ -50,7 +50,7 @@ class ProductDetail extends Component {
                         <input type="file" className="form-control" onChange={(e) => this.previewImage(e)} />
                     </div>
                     <div className="mb-3">
-                        <button className="btn btn-primary me-2" onClick={(e) => this.btnAddClick(e)}>ADD NEW</button>
+                        <button className="btn btn-success me-2" onClick={(e) => this.btnAddClick(e)}>ADD NEW</button>
                         <button className="btn btn-warning me-2" onClick={(e) => this.btnUpdateClick(e)}>UPDATE</button>
                         <button className="btn btn-danger" onClick={(e) => this.btnDeleteClick(e)}>DELETE</button>
                     </div>
@@ -145,10 +145,10 @@ class ProductDetail extends Component {
         axios.post('/api/admin/products', prod, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Thêm sản phẩm thành công!');
                 this.apiGetProducts();
             } else {
-                alert('SORRY BABY!');
+                alert('Thêm sản phẩm thất bại!');
             }
         });
     }
@@ -158,10 +158,10 @@ class ProductDetail extends Component {
         axios.put('/api/admin/products/' + id, prod, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Cập nhật sản phẩm thành công!');
                 this.apiGetProducts();
             } else {
-                alert('SORRY BABY!');
+                alert('Cập nhật sản phẩm thất bại!');
             }
         });
     }
@@ -171,10 +171,10 @@ class ProductDetail extends Component {
         axios.delete('/api/admin/products/' + id, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Xóa sản phẩm thành công!');
                 this.apiGetProducts();
             } else {
-                alert('SORRY BABY!');
+                alert('Xóa sản phẩm thất bại!');
             }
         });
     }

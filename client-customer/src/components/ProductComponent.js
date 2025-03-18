@@ -11,20 +11,29 @@ class Product extends Component {
         };
     }
     render() {
-        const prods = this.state.products.map((item) => {
-            return (
-                <div key={item._id} className="inline">
-                    <figure>
-                        <Link to={'/product/' + item._id}><img src={"data:image/jpg;base64," + item.image} width="300px" height="300px" alt="" /></Link>
-                        <figcaption className="text-center">{item.name}<br />Price: {item.price}</figcaption>
-                    </figure>
-                </div>
-            );
-        });
         return (
-            <div className="text-center">
-                <h2 className="text-center">LIST PRODUCTS</h2>
-                {prods}
+            <div className="container mt-4">
+                <h2 className="text-center mb-4">LIST PRODUCTS</h2>
+                <div className="row">
+                    {this.state.products.map((item) => (
+                        <div key={item._id} className="col-md-4 mb-4">
+                            <div className="card shadow-sm">
+                                <Link to={'/product/' + item._id}>
+                                    <img 
+                                        src={"data:image/jpg;base64," + item.image} 
+                                        className="card-img-top" 
+                                        alt={item.name} 
+                                    />
+                                </Link>
+                                <div className="card-body text-center">
+                                    <h5 className="card-title">{item.name}</h5>
+                                    <p className="card-text fw-bold text-primary">Price: ${item.price}</p>
+                                    <Link to={'/product/' + item._id} className="btn btn-outline-primary">View Details</Link>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
