@@ -17,47 +17,53 @@ class Product extends Component {
     render() {
         const prods = this.state.products.map((item) => {
             return (
-                <tr key={item._id} className="datatable" onClick={() => this.trItemClick(item)}>
+                <tr key={item._id} onClick={() => this.trItemClick(item)}>
                     <td>{item._id}</td>
                     <td>{item.name}</td>
                     <td>{item.price}</td>
                     <td>{new Date(item.cdate).toLocaleString()}</td>
                     <td>{item.category.name}</td>
-                    <td><img src={"data:image/jpg;base64," + item.image} width="100px" height="100px" alt="" /></td>
+                    <td>
+                        <img src={`data:image/jpg;base64,${item.image}`} className="img-thumbnail" width="100" alt="Product" />
+                    </td>
                 </tr>
             );
         });
         const pagination = Array.from({ length: this.state.noPages }, (_, index) => {
             if ((index + 1) === this.state.curPage) {
-                return (<span key={index}>| <b>{index + 1}</b> |</span>);
+                return (<span key={index} className="fw-bold mx-2">| <b>{index + 1}</b> |</span>);
             } else {
-                return (<span key={index} className="link" onClick={() => this.lnkPageClick(index + 1)}>| {index + 1} |</span>);
+                return (<span key={index} className="text-primary mx-2" style={{ cursor: 'pointer' }} onClick={() => this.lnkPageClick(index + 1)}>| {index + 1} |</span>);
             }
         });
         return (
-            <div>
-                <div className="float-left">
-                    <h2 className="text-center">PRODUCT LIST</h2>
-                    <table className="datatable" border="1">
-                        <tbody>
-                            <tr className="datatable">
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Price</th>
-                                <th>Creation date</th>
-                                <th>Category</th>
-                                <th>Image</th>
-                            </tr>
-                            {prods}
-                            <tr>
-                                <td colSpan="6">{pagination}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div className="container mt-4">
+                <div className="row">
+                    <div className="col-md-8">
+                        <h2 className="text-center">PRODUCT LIST</h2>
+                        <table className="table table-striped table-bordered">
+                            <thead className="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Creation Date</th>
+                                    <th>Category</th>
+                                    <th>Image</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {prods}
+                                <tr>
+                                    <td colSpan="6" className="text-center">{pagination}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="col-md-4">
+                        <ProductDetail item={this.state.itemSelected} curPage={this.state.curPage} updateProducts={this.updateProducts} />
+                    </div>
                 </div>
-                <div className="inline" />
-                <ProductDetail item={this.state.itemSelected} curPage={this.state.curPage} updateProducts={this.updateProducts} />
-                <div className="float-clear" />
             </div>
         );
     }

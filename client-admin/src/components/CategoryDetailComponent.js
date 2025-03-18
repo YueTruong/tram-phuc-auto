@@ -13,29 +13,38 @@ class CategoryDetail extends Component {
     }
     render() {
         return (
-            <div className="float-right">
-                <h2 className="text-center">CATEGORY DETAIL</h2>
-                <form>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>ID</td>
-                                <td><input type="text" value={this.state.txtID} onChange={(e) => {this.setState({txtID: e.target.value})}} readOnly={true}/></td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td><input type="text" value={this.state.txtName} onChange={(e) => {this.setState({txtName: e.target.value})}}/></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>
-                                    <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)}/>
-                                    <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)}/>
-                                    <input type="submit" value="DELETE" onClick={(e) => this.btnDeleteClick(e)}/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div className="container mt-4">
+                <h2 className="text-center text-primary mb-4">CATEGORY DETAIL</h2>
+                <form className="border p-4 rounded shadow bg-light">
+                    {/* ID Input */}
+                    <div className="mb-3">
+                        <label className="form-label">ID</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.state.txtID}
+                            onChange={(e) => this.setState({ txtID: e.target.value })}
+                            readOnly
+                        />
+                    </div>
+
+                    {/* Name Input */}
+                    <div className="mb-3">
+                        <label className="form-label">Name</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.state.txtName}
+                            onChange={(e) => this.setState({ txtName: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="d-flex justify-content-between">
+                        <button className="btn btn-success" onClick={(e) => this.btnAddClick(e)}>ADD NEW</button>
+                        <button className="btn btn-warning" onClick={(e) => this.btnUpdateClick(e)}>UPDATE</button>
+                        <button className="btn btn-danger" onClick={(e) => this.btnDeleteClick(e)}>DELETE</button>
+                    </div>
                 </form>
             </div>
         );
