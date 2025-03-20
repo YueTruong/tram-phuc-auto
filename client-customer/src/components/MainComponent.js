@@ -1,10 +1,10 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Menu from "./MenuComponent";
 import Inform from "./InformComponent";
 import Home from "./HomeComponent";
-import {Routes, Route, Navigate} from 'react-router-dom';
-import Product from './ProductComponent';
-import ProductDetail from './ProductDetailComponent';
+import Product from "./ProductComponent";
+import ProductDetail from "./ProductDetailComponent";
 
 class Main extends Component {
     render() {
@@ -13,11 +13,16 @@ class Main extends Component {
                 <Menu />
                 <Inform />
                 <Routes>
-                    <Route path='/' element={<Navigate replace to='/home'/>}/>
-                    <Route path='/' element={<Home/>}/>
-                    <Route path='/product/category/:cid' element={<Product/>}/>
-                    <Route path='/product/search/:keyword' element={<Product />} />
-                    <Route path='/product/:id' element={<ProductDetail />} />
+                    {/* Redirect '/' to '/home' */}
+                    <Route path="/" element={<Navigate replace to="/home" />} />
+                    
+                    {/* Corrected Home Route */}
+                    <Route path="/home" element={<Home />} />
+                    
+                    {/* Product Listing & Details */}
+                    <Route path="/product/category/:cid" element={<Product />} />
+                    <Route path="/product/search/:keyword" element={<Product />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
                 </Routes>
             </div>
         );
