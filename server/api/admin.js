@@ -10,19 +10,23 @@ const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
 
 //Login
-router.post('/login', async function (req, res) {
-    const username = req.body.username;
-    const password = req.body.password;
-    if (username && password) {
-        const admin = await AdminDAO.selectByUsernameAndPassword(username, password);
-        if (admin) {
-            const token = JwtUtil.genToken();
-            res.json({success: true, message: 'Authentication successful', token: token});
-        } else {
-            res.json({success: false, message: 'Incorrect username or password'});
+router.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ success: false, message: 'Username and password required' });
         }
-    } else {
-        res.json({success: false, message: 'Please input username and password'});
+
+        const admin = await AdminDAO.selectByUsernameAndPassword(username, password);
+        if (!admin) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        const token = JwtUtil.genToken(username, password);
+        res.json({ success: true, message: 'Authentication successful', token });
+    } catch (error) {
+        console.error("❌ Login error:", error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
 

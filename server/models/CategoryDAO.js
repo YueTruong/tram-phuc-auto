@@ -3,9 +3,12 @@ const Models = require('./Models');
 
 const CategoryDAO = {
     async selectAll() {
-        const query = {};
-        const categories = await Models.Category.find(query).exec();
-        return categories;
+        try {
+            return await Models.Category.find({});
+        } catch (error) {
+            console.error("❌ Error fetching categories:", error);
+            return [];
+        }
     },
     
     async insert(category) {
