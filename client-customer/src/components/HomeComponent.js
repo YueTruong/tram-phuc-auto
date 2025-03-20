@@ -13,36 +13,53 @@ class Home extends Component {
     render() {
         const newprods = this.state.newprods.map((item) => {
             return (
-                <div key={item._id} className="inline">
-                    <figure>
-                        <Link to={'/product/' + item._id}><img src={"data:image/jpg;base64," + item.image} width="300px" height="300px" alt="" /></Link>
-                        <figcaption className="text-center">{item.name}<br />Price: {item.price}</figcaption>
-                    </figure>
+                <div key={item._id} className="col-md-4 mb-4">
+                    <div className="card shadow-sm">
+                        <Link to={'/product/' + item._id}>
+                            <img src={"data:image/jpg;base64," + item.image} className="card-img-top" alt={item.name} />
+                        </Link>
+                        <div className="card-body text-center">
+                            <h5 className="card-title">{item.name}</h5>
+                            <p className="card-text text-danger fw-bold">Price: ${item.price}</p>
+                        </div>
+                    </div>
                 </div>
             );
         });
         const hotprods = this.state.hotprods.map((item) => {
             return (
-                <div key={item._id} className="inline">
-                    <figure>
-                        <Link to={'/product/' + item._id}><img src={"data:image/jpg;base64," + item.image} width="300px" height="300px" alt="" /></Link>
-                        <figcaption className="text-center">{item.name}<br />Price: {item.price}</figcaption>
-                    </figure>
+                <div key={item._id} className="col-md-4 mb-4">
+                    <div className="card shadow-sm">
+                        <Link to={'/product/' + item._id}>
+                            <img src={"data:image/jpg;base64," + item.image} className="card-img-top" alt={item.name} />
+                        </Link>
+                        <div className="card-body text-center">
+                            <h5 className="card-title">{item.name}</h5>
+                            <p className="card-text text-danger fw-bold">Price: ${item.price}</p>
+                        </div>
+                    </div>
                 </div>
             );
         });
         return (
-            <div>
-                <div className="align-center">
-                    <h2 className="text-center">NEW PRODUCTS</h2>
+            <div className="container mt-4">
+                <div className="text-center">
+                    <h2 className="mb-4 text-primary">NEW PRODUCTS</h2>
+                </div>
+                <div className="row">
                     {newprods}
                 </div>
-                {this.state.hotprods.length > 0 ?
-                <div className="align-center">
-                    <h2 className="text-center">HOT PRODUCTS</h2>
-                    {hotprods}
-                </div>
-                : <div />}
+
+                {this.state.hotprods.length > 0 && (
+                    <>
+                        <div className="text-center">
+                            <h2 className="mt-5 mb-4 text-warning">HOT PRODUCTS</h2>
+                        </div>
+                        <div className="row">
+                            {hotprods}
+                        </div>
+                    </>
+                )}
             </div>
         );
     }
@@ -52,16 +69,16 @@ class Home extends Component {
         this.apiGetHotProducts();
     }
 
-    //LinkPIs
+    //APIs
     apiGetNewProducts() {
-        axios.get('/Linkpi/customer/products/new').then((res) => {
+        axios.get('/api/customer/products/new').then((res) => {
             const result = res.data;
             this.setState({ newprods: result });
         });
     }
 
     apiGetHotProducts() {
-        axios.get('/Linkpi/customer/products/hot').then((res) => {
+        axios.get('/api/customer/products/hot').then((res) => {
             const result = res.data;
             this.setState({ hotprods: result });
         });

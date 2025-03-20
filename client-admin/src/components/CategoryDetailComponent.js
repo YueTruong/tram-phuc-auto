@@ -13,29 +13,38 @@ class CategoryDetail extends Component {
     }
     render() {
         return (
-            <div className="float-right">
-                <h2 className="text-center">CATEGORY DETAIL</h2>
-                <form>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>ID</td>
-                                <td><input type="text" value={this.state.txtID} onChange={(e) => {this.setState({txtID: e.target.value})}} readOnly={true}/></td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td><input type="text" value={this.state.txtName} onChange={(e) => {this.setState({txtName: e.target.value})}}/></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>
-                                    <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)}/>
-                                    <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)}/>
-                                    <input type="submit" value="DELETE" onClick={(e) => this.btnDeleteClick(e)}/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div className="container mt-4">
+                <h2 className="text-center text-primary mb-4">CATEGORY DETAIL</h2>
+                <form className="border p-4 rounded shadow bg-light">
+                    {/* ID Input */}
+                    <div className="mb-3">
+                        <label className="form-label">ID</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.state.txtID}
+                            onChange={(e) => this.setState({ txtID: e.target.value })}
+                            readOnly
+                        />
+                    </div>
+
+                    {/* Name Input */}
+                    <div className="mb-3">
+                        <label className="form-label">Name</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.state.txtName}
+                            onChange={(e) => this.setState({ txtName: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="d-flex justify-content-between">
+                        <button className="btn btn-success" onClick={(e) => this.btnAddClick(e)}>ADD NEW</button>
+                        <button className="btn btn-warning" onClick={(e) => this.btnUpdateClick(e)}>UPDATE</button>
+                        <button className="btn btn-danger" onClick={(e) => this.btnDeleteClick(e)}>DELETE</button>
+                    </div>
                 </form>
             </div>
         );
@@ -89,10 +98,10 @@ class CategoryDetail extends Component {
         axios.post('/api/admin/categories', cate, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Thêm danh mục thành công!');
                 this.apiGetCategories();
             } else {
-                alert('SORRY BABY!');
+                alert('Thêm danh mục thất bại!');
             }
         });
     }
@@ -110,10 +119,10 @@ class CategoryDetail extends Component {
         axios.put('/api/admin/categories/' + id, cate, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Cập nhật danh mục thành công!');
                 this.apiGetCategories();
             } else {
-                alert('SORRY BABY!');
+                alert('Cập nhật danh mục thất bại!');
             }
         });
     }
@@ -123,10 +132,10 @@ class CategoryDetail extends Component {
         axios.delete('/api/admin/categories/' + id, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Xóa danh mục thành công!');
                 this.apiGetCategories();
             } else {
-                alert('SORRY BABY!');
+                alert('Xóa danh mục thất bại!');
             }
         });
     }

@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import logoImg from '../assets/logo.jpg';
 
 class Home extends Component {
     render() {
@@ -6,7 +7,7 @@ class Home extends Component {
             <div className="d-flex flex-column justify-content-center align-items-center vh-100 text-center">
                 <h2 className="mb-4">ADMIN HOME</h2>
                 <div className='shadow-lg p-4 rounded bg-white'>
-                    <img src="http://cliparting.com/wp-content/uploads/2018/03/animated-emoticons-2018-13.gif" width="800px" height="600px" alt="" />
+                    <img src={logoImg} width="800px" height="800px" alt="" />
                 </div>
             </div>
         );

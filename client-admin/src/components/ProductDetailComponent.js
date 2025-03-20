@@ -27,41 +27,36 @@ class ProductDetail extends Component {
             <div className="float-right">
                 <h2 className="text-center">PRODUCT DETAIL</h2>
                 <form>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>ID</td>
-                                <td><input type="text" value={this.state.txtID} onChange={(e) => {this.setState({txtID: e.target.value})}} readOnly={true} /></td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td><input type="text" value={this.state.txtName} onChange={(e) => {this.setState({txtName: e.target.value})}} /></td>
-                            </tr>
-                            <tr>
-                                <td>Price</td>
-                                <td><input type="text" value={this.state.txtPrice} onChange={(e) => {this.setState({txtPrice: e.target.value})}} /></td>
-                            </tr>
-                            <tr>
-                                <td>Image</td>
-                                <td><input type="file" name="fileImage" accept="image/jpeg, image/png, image/gif" onChange={(e) => this.previewImage(e)} /></td>
-                            </tr>
-                            <tr>
-                                <td>Category</td>
-                                <td><select onChange={(e) => {this.setState({cmbCategory: e.target.value})}}>{cates}</select></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>
-                                    <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)} />
-                                    <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)} />
-                                    <input type="submit" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colSpan="2"><img src={this.state.imgProduct} width="300px" height="300px"alt="" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div className="mb-3">
+                        <label className="form-label">ID</label>
+                        <input type="text" className="form-control" value={this.state.txtID} readOnly />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Name</label>
+                        <input type="text" className="form-control" value={this.state.txtName} onChange={(e) => this.setState({ txtName: e.target.value })} />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Price</label>
+                        <input type="number" className="form-control" value={this.state.txtPrice} onChange={(e) => this.setState({ txtPrice: e.target.value })} />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Category</label>
+                        <select className="form-select" onChange={(e) => this.setState({ cmbCategory: e.target.value })}>
+                            {cates}
+                        </select>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Image</label>
+                        <input type="file" className="form-control" onChange={(e) => this.previewImage(e)} />
+                    </div>
+                    <div className="mb-3">
+                        <button className="btn btn-success me-2" onClick={(e) => this.btnAddClick(e)}>ADD NEW</button>
+                        <button className="btn btn-warning me-2" onClick={(e) => this.btnUpdateClick(e)}>UPDATE</button>
+                        <button className="btn btn-danger" onClick={(e) => this.btnDeleteClick(e)}>DELETE</button>
+                    </div>
+                    <div className="mb-3">
+                        <img src={this.state.imgProduct} className="img-thumbnail" width="300px" height="300px" alt="" />
+                    </div>
                 </form>
             </div>
         );
@@ -150,10 +145,10 @@ class ProductDetail extends Component {
         axios.post('/api/admin/products', prod, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Thêm sản phẩm thành công!');
                 this.apiGetProducts();
             } else {
-                alert('SORRY BABY!');
+                alert('Thêm sản phẩm thất bại!');
             }
         });
     }
@@ -163,10 +158,10 @@ class ProductDetail extends Component {
         axios.put('/api/admin/products/' + id, prod, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Cập nhật sản phẩm thành công!');
                 this.apiGetProducts();
             } else {
-                alert('SORRY BABY!');
+                alert('Cập nhật sản phẩm thất bại!');
             }
         });
     }
@@ -176,10 +171,10 @@ class ProductDetail extends Component {
         axios.delete('/api/admin/products/' + id, config).then((res) => {
             const result = res.data;
             if (result) {
-                alert('OK BABY!');
+                alert('Xóa sản phẩm thành công!');
                 this.apiGetProducts();
             } else {
-                alert('SORRY BABY!');
+                alert('Xóa sản phẩm thất bại!');
             }
         });
     }
