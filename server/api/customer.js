@@ -4,6 +4,7 @@ const router = express.Router();
 //Utils
 const CryptoUtil = require('../utils/CryptoUtil');
 const JwtUtil = require('../utils/JwtUtil');
+const EmailUtil = require('../utils/EmailUtil');
 
 //DAOs
 const CategoryDAO = require('../models/CategoryDAO');
@@ -61,6 +62,10 @@ router.post('/register', async (req, res) => {
 
         // Hash password and create new customer
         const hashedPassword = CryptoUtil.md5(password);
+
+        // Generate token
+        const token = JwtUtil.genToken(username, password);
+
         const newCustomer = {
             username,
             password: hashedPassword,
@@ -68,11 +73,20 @@ router.post('/register', async (req, res) => {
             phone,
             email,
             active: 0, // Default inactive
-            token: JwtUtil.genToken(username, email)
+            token,
         };
 
         const result = await CustomerDAO.insert(newCustomer);
-        res.status(201).json({ message: 'Customer registered successfully', customer: result });
+        if (result) {
+            const send = await EmailUtil.send(email, result._id, token);
+            if (send) {
+                return res.json({ success: true, message: 'Please check email!' });
+            } else {
+                return res.json({ success: false, message: 'Send email failed!' });
+            }
+        } else {
+            return res.json({ success: false, message: 'Register failed!' });
+        }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
