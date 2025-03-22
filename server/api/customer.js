@@ -1,17 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+
+//Utils
+const CryptoUtil = require('../utils/CryptoUtil');
+const JwtUtil = require('../utils/JwtUtil');
 
 //DAOs
 const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
-
-// Middleware
-const Customer = require("../models/Models").Customer;
-const EmailUtil = require("../utils/EmailUtil");
-const MyConstants = require("../utils/MyConstants");
+const CustomerDAO = require('../models/CustomerDAO');
 
 //Category
 router.get('/categories', async function (req, res) {
@@ -48,79 +45,126 @@ router.get('/products/:id', async function (req, res) {
     res.json(product);
 });
 
-// Generate JWT token
-const genToken = (customer) => {
-    return jwt.sign(
-        { id: customer._id, username: customer.username },
-        MyConstants.JWT_SECRET,
-        { expiresIn: "1h" }
-    );
-};
-
-// 📌 1. Register Customer
-router.post("/signup", async (req, res) => {
-    const { username, password, name, phone, email } = req.body;
-
+// Register a new customer
+router.post('/register', async (req, res) => {
     try {
-        const existingCustomer = await Customer.findOne({ username });
-        if (existingCustomer) return res.status(400).json({ message: "Username already taken" });
+        const { username, password, name, phone, email } = req.body;
+        if (!username || !password || !email) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Check if username or email already exists
+        const existingCustomer = await CustomerDAO.selectByUsernameOrEmail(username, email);
+        if (existingCustomer) {
+            return res.status(400).json({ message: 'Username or email already exists' });
+        }
 
-        const newCustomer = new Customer({
-            _id: new mongoose.Types.ObjectId(),
+        // Hash password and create new customer
+        const hashedPassword = CryptoUtil.md5(password);
+        const newCustomer = {
             username,
             password: hashedPassword,
             name,
             phone,
             email,
-            active: 0,
-            token: genToken({ username })
-        });
+            active: 0, // Default inactive
+            token: JwtUtil.genToken(username, email)
+        };
 
-        await newCustomer.save();
-
-        // Send activation email
-        const activationLink = `${MyConstants.CLIENT_URL}/activate/${newCustomer._id}`;
-        await EmailUtil.send(email, "Account Activation", `Click to activate: ${activationLink}`);
-
-        res.status(201).json({ message: "Customer registered. Check email to activate account." });
+        const result = await CustomerDAO.insert(newCustomer);
+        res.status(201).json({ message: 'Customer registered successfully', customer: result });
     } catch (error) {
-        res.status(500).json({ message: "Error signing up", error });
+        res.status(500).json({ message: error.message });
     }
 });
 
-// 📌 2. Activate Customer
-router.get("/activate/:id", async (req, res) => {
+// Login customer
+router.post('/login', async (req, res) => {
     try {
-        const customer = await Customer.findById(req.params.id);
-        if (!customer) return res.status(404).json({ message: "Invalid activation link" });
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
-        customer.active = 1;
-        await customer.save();
-        res.json({ message: "Account activated successfully" });
+        // Hash password and find user
+        const hashedPassword = CryptoUtil.md5(password);
+        const customer = await CustomerDAO.selectByUsernameAndPassword(username, hashedPassword);
+
+        if (!customer) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        }
+
+        if (customer.active === 0) {
+            return res.status(403).json({ message: 'Account is not activated' });
+        }
+
+        const token = JwtUtil.genToken(username, customer.password);
+        res.status(200).json({ message: 'Login successful', token, customer });
     } catch (error) {
-        res.status(500).json({ message: "Activation failed", error });
+        res.status(500).json({ message: error.message });
     }
 });
 
-// 📌 3. Login Customer
-router.post("/login", async (req, res) => {
-    const { username, password } = req.body;
-
+// Activate account
+router.post('/activate', async (req, res) => {
     try {
-        const customer = await Customer.findOne({ username });
-        if (!customer) return res.status(404).json({ message: "User not found" });
+        const { _id, token } = req.body;
+        const result = await CustomerDAO.active(_id, token, 1);
+        
+        if (!result) {
+            return res.status(400).json({ message: 'Invalid activation details' });
+        }
 
-        if (!customer.active) return res.status(403).json({ message: "Account not activated" });
-
-        const isMatch = await bcrypt.compare(password, customer.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-
-        const token = genToken(customer);
-        res.json({ message: "Login successful", token, customer });
+        res.status(200).json({ message: 'Account activated successfully' });
     } catch (error) {
-        res.status(500).json({ message: "Login error", error });
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get all customers
+router.get('/', async (req, res) => {
+    try {
+        const customers = await CustomerDAO.selectAll();
+        res.status(200).json(customers);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get customer by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const customer = await CustomerDAO.selectByID(req.params.id);
+        if (!customer) {
+            return res.status(404).json({ message: 'Customer not found' });
+        }
+        res.status(200).json(customer);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Update customer
+router.put('/:id', async (req, res) => {
+    try {
+        const { username, password, name, phone, email } = req.body;
+        const updatedCustomer = {
+            _id: req.params.id,
+            username,
+            password: CryptoUtil.md5(password),
+            name,
+            phone,
+            email
+        };
+
+        const result = await CustomerDAO.update(updatedCustomer);
+        if (!result) {
+            return res.status(400).json({ message: 'Update failed' });
+        }
+
+        res.status(200).json({ message: 'Customer updated successfully', customer: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
