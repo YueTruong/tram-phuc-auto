@@ -47,11 +47,22 @@ const OrderSchema = mongoose.Schema({
     items: [ItemSchema]
 }, {versionKey: false});
 
+const CartSchema = mongoose.Schema({
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
+    items: [
+        {
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+            quantity: { type: Number, required: true, default: 1 },
+        }
+    ]
+}, { versionKey: false });
+
 //Models
 const Admin = mongoose.model('Admin', AdminSchema);
 const Category = mongoose.model('Category', CategorySchema);
 const Customer = mongoose.model('Customer', CustomerSchema);
 const Product = mongoose.model('Product', ProductSchema);
 const Order = mongoose.model('Order', OrderSchema);
+const Cart = mongoose.model("Cart", CartSchema);
 
-module.exports = {Admin, Category, Customer, Product, Order};
+module.exports = {Admin, Category, Customer, Product, Order, Cart};

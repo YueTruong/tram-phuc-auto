@@ -10,6 +10,9 @@ const EmailUtil = require('../utils/EmailUtil');
 const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
 const CustomerDAO = require('../models/CustomerDAO');
+const OrderDAO = require("../models/OrderDAO");
+const CartDAO = require("../models/CartDAO");
+const {Customer} = require("../models/Models");
 
 //Category
 router.get('/categories', async function (req, res) {
@@ -135,6 +138,19 @@ router.post('/activate', async (req, res) => {
     }
 });
 
+router.get("/me", JwtUtil.checkToken, async (req, res) => {
+    try {
+        const customer = await Customer.findOne({ username: req.user.username }).select("-password");
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        console.log("Server response:", customer); // Kiểm tra dữ liệu trên server
+        res.json(customer);
+    } catch (error) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Get all customers
 router.get('/', async (req, res) => {
     try {
@@ -179,6 +195,98 @@ router.put('/:id', async (req, res) => {
         res.status(200).json({ message: 'Customer updated successfully', customer: result });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+
+// Middleware kiểm tra đăng nhập
+const authenticate = (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+    try {
+        const decoded = JwtUtil.checkToken(token);
+        req.customer = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: "Invalid token" });
+    }
+};
+
+// Order
+router.post("/order", authenticate, async (req, res) => {
+    try {
+        const { items, total } = req.body;
+        const newOrder = {
+            customer: req.customer._id,
+            items,
+            total,
+            status: "Pending",
+            cdate: new Date(),
+        };
+
+        const result = await OrderDAO.createOrder(newOrder);
+        res.status(201).json({ success: true, message: "Order placed successfully!", order: result });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Order history
+router.get("/orders", authenticate, async (req, res) => {
+    try {
+        const orders = await OrderDAO.getOrdersByCustomer(req.customer._id);
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Middleware to verify customer token
+const verifyCustomer = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+        const decoded = JwtUtil.verifyToken(token);
+        const customer = await Customer.findOne({ username: decoded.username });
+
+        if (!customer) return res.status(404).json({ message: "Customer not found" });
+
+        req.customer = customer;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: "Invalid token" });
+    }
+};
+
+// Get customer cart
+router.get("/cart", verifyCustomer, async (req, res) => {
+    try {
+        const cart = await CartDAO.getCart(req.customer._id);
+        res.json(cart || { items: [] });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching cart" });
+    }
+});
+
+// Update cart
+router.post("/cart", verifyCustomer, async (req, res) => {
+    try {
+        const { items } = req.body;
+        const updatedCart = await CartDAO.updateCart(req.customer._id, items);
+        res.json(updatedCart);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating cart" });
+    }
+});
+
+// Clear cart
+router.delete("/cart", verifyCustomer, async (req, res) => {
+    try {
+        await CartDAO.clearCart(req.customer._id);
+        res.json({ message: "Cart cleared" });
+    } catch (error) {
+        res.status(500).json({ message: "Error clearing cart" });
     }
 });
 

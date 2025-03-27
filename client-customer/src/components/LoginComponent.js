@@ -21,11 +21,16 @@ class Login extends Component {
         try {
             const res = await axios.post("/api/customer/login", this.state);
             localStorage.setItem("token", res.data.token);
+            localStorage.setItem("customer", JSON.stringify(res.data.customer));
+            
+            // Gửi sự kiện cập nhật customer
+            window.dispatchEvent(new Event("customerUpdated"));
+    
             this.props.navigate("/"); // Redirect to home
         } catch (error) {
             this.setState({ message: error.response?.data?.message || "Login failed" });
         }
-    };
+    };    
 
     render() {
         return (

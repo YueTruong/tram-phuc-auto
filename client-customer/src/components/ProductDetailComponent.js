@@ -1,8 +1,11 @@
 import axios from "axios";
 import React, { Component } from "react";
 import withRouter from "../utils/withRouter";
+import { CartContext } from "../contexts/CartContext"; // Import CartContext
 
 class ProductDetail extends Component {
+    static contextType = CartContext; // Use context for cart
+
     constructor(props) {
         super(props);
         this.state = {
@@ -15,7 +18,6 @@ class ProductDetail extends Component {
         this.apiGetProduct(this.props.params.id);
     }
 
-    // API Call with Error Handling
     apiGetProduct = async (id) => {
         try {
             const res = await axios.get(`/api/customer/products/${id}`);
@@ -26,15 +28,18 @@ class ProductDetail extends Component {
         }
     };
 
-    // Handle quantity change
     handleQuantityChange = (event) => {
-        this.setState({ quantity: event.target.value });
+        this.setState({ quantity: parseInt(event.target.value, 10) || 1 });
     };
 
-    // Add to Cart (Placeholder function)
     addToCart = () => {
-        console.log(`Adding ${this.state.quantity} of ${this.state.product.name} to cart`);
-        alert("Product added to cart! (Functionality to be implemented)");
+        const { product, quantity } = this.state;
+        const { addToCart } = this.context; // Get addToCart from context
+
+        if (!product) return;
+
+        addToCart(product, quantity);
+        alert(`${quantity} of ${product.name} added to cart!`);
     };
 
     render() {
