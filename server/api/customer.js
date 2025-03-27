@@ -290,4 +290,26 @@ router.delete("/cart", verifyCustomer, async (req, res) => {
     }
 });
 
+// API tạo đơn hàng
+router.post("/orders", JwtUtil.checkToken, async (req, res) => {
+    try {
+        const { items, total } = req.body;
+        const customerId = req.user._id;
+
+        const newOrder = new Order({
+            cdate: new Date(),
+            total,
+            status: "Pending",
+            customer: customerId,
+            items,
+        });
+
+        await newOrder.save();
+        res.status(201).json({ message: "Order placed successfully" });
+    } catch (error) {
+        console.error("Order creation failed:", error);
+        res.status(500).json({ error: "Failed to place order" });
+    }
+});
+
 module.exports = router;

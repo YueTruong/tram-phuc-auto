@@ -1,10 +1,10 @@
 import axios from "axios";
 import React, { Component } from "react";
 import withRouter from "../utils/withRouter";
-import { CartContext } from "../contexts/CartContext"; // Import CartContext
+import MyContext from "../contexts/MyContext";
 
 class ProductDetail extends Component {
-    static contextType = CartContext; // Use context for cart
+    static contextType = MyContext;
 
     constructor(props) {
         super(props);

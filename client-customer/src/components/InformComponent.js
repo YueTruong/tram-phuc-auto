@@ -1,102 +1,73 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { CartContext } from "../contexts/CartContext";
+import MyContext from "../contexts/MyContext";
 import axios from "axios";
 
-const Inform = () => {
-    const { cart } = useContext(CartContext); // Get cart data
-    const [customer, setCustomer] = useState(null);
-    const [showCart, setShowCart] = useState(false); // State to toggle cart preview
+class Inform extends Component {
+    static contextType = MyContext;
 
-    useEffect(() => {
-        fetchCustomer();
-
-        const handleCustomerUpdate = () => fetchCustomer();
-        window.addEventListener("customerUpdated", handleCustomerUpdate);
-
-        return () => {
-            window.removeEventListener("customerUpdated", handleCustomerUpdate);
+    constructor(props) {
+        super(props);
+        this.state = {
+            customer: null,
+            showCart: false,
         };
-    }, []);
+    }
 
-    const fetchCustomer = async () => {
+    componentDidMount() {
+        this.fetchCustomer();
+        window.addEventListener("customerUpdated", this.fetchCustomer);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("customerUpdated", this.fetchCustomer);
+    }
+
+    fetchCustomer = async () => {
         const token = localStorage.getItem("token");
         if (token) {
             try {
                 const res = await axios.get("/api/customer/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                setCustomer(res.data);
+                this.setState({ customer: res.data });
             } catch (error) {
                 console.error("Error fetching customer:", error);
             }
         }
     };
 
-    const handleLogout = () => {
+    handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("customer");
-        setCustomer(null);
+        this.setState({ customer: null });
         window.location.href = "/";
     };
 
-    return (
-        <div className="border-bottom bg-light py-2 shadow-sm">
-            <div className="container d-flex justify-content-between align-items-center">
-                {/* User Authentication Links */}
-                {!customer ? (
+    toggleCartPreview = (show) => {
+        this.setState({ showCart: show });
+    };
+
+    render() {
+        const { cart = [] } = this.context || {}; // Đảm bảo cart luôn có giá trị mặc định
+    
+        return (
+            <div className="border-bottom bg-light py-2 shadow-sm">
+                <div className="container d-flex justify-content-between align-items-center">
                     <div>
                         <Link to="/register" className="text-decoration-none me-3 text-dark">Sign-up</Link>
                         <Link to="/login" className="text-decoration-none me-3 text-dark">Login</Link>
                         <Link to="/activate" className="text-decoration-none text-dark">Activate</Link>
                     </div>
-                ) : (
-                    <div>
-                        <span className="me-3 text-dark">Hello, {customer.name || customer.username || "Guest"}</span>
-                        <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>Logout</button>
+                    <div className="position-relative">
+                        <Link to="/cart" className="text-decoration-none text-dark">
+                            My cart ({cart.length} items)
+                        </Link>
                     </div>
-                )}
-
-                {/* Cart Section with Preview */}
-                <div className="position-relative">
-                    <Link
-                        to="/cart"
-                        className="text-decoration-none text-dark"
-                        onMouseEnter={() => setShowCart(true)}
-                        onMouseLeave={() => setShowCart(false)}
-                    >
-                        My cart ({cart.length} items)
-                    </Link>
-
-                    {/* Cart Dropdown Preview */}
-                    {showCart && cart.length > 0 && (
-                        <div
-                            className="position-absolute bg-white shadow rounded p-3"
-                            style={{
-                                top: "30px",
-                                right: "0",
-                                minWidth: "250px",
-                                zIndex: 1000,
-                            }}
-                            onMouseEnter={() => setShowCart(true)}
-                            onMouseLeave={() => setShowCart(false)}
-                        >
-                            <h6 className="border-bottom pb-2">Cart Preview</h6>
-                            <ul className="list-unstyled">
-                                {cart.slice(0, 3).map((item, index) => (
-                                    <li key={index} className="d-flex justify-content-between mb-2">
-                                        <span>{item.name}</span>
-                                        <span className="fw-bold">${item.price} x {item.quantity}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link to="/cart" className="btn btn-sm btn-primary w-100">View Full Cart</Link>
-                        </div>
-                    )}
                 </div>
             </div>
-        </div>
-    );
-};
+        );
+    }
+}
 
 export default Inform;

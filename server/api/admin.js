@@ -8,6 +8,7 @@ const JwtUtil = require('../utils/JwtUtil');
 const AdminDAO = require('../models/AdminDAO');
 const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
+const OrderDAO = require('../models/OrderDAO');
 
 //Login
 router.post('/login', async (req, res) => {
@@ -108,4 +109,19 @@ router.delete('/products/:id', JwtUtil.checkToken, async function (req, res) {
     const result = await ProductDAO.delete(_id);
     res.json(result);
 });
+
+// API lấy danh sách đơn hàng
+router.get("/orders", JwtUtil.checkToken, async (req, res) => {
+    try {
+        const orders = await Order.find()
+            .populate("customer", "name email phone")
+            .populate("items.productId", "name price");
+
+        res.json(orders || []); // Luôn trả về một mảng
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        res.status(500).json({ error: "Failed to fetch orders" });
+    }
+});
+
 module.exports = router;
