@@ -1,69 +1,103 @@
 require('../utils/MongooseUtil');
+const mongoose = require('mongoose');
 const Models = require('./Models');
 
 const ProductDAO = {
     async selectAll() {
-        const query = {};
-        const products = await Models.Product.find(query).exec();
-        return products;
+        try {
+            return await Models.Product.find({});
+        } catch (error) {
+            console.error("❌ Error fetching products:", error);
+            return [];
+        }
     },
 
     async insert(product) {
-        const mongoose = require('mongoose');
-        product._id = new mongoose.Types.ObjectId();
-        const result = await Models.Product.create(product);
-        return result;
+        try {
+            product._id = new mongoose.Types.ObjectId();
+            return await Models.Product.create(product);
+        } catch (error) {
+            console.error("❌ Error inserting product:", error);
+            return null;
+        }
     },
 
     async update(product) {
-        const newvalues = {name: product.name, price: product.price, image: product.image, category: product.category};
-        const result = await Models.Product.findByIdAndUpdate(product._id, newvalues, { new: true });
-        return result;
+        try {
+            const newValues = {
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                category: product.category
+            };
+            return await Models.Product.findByIdAndUpdate(product._id, newValues, { new: true });
+        } catch (error) {
+            console.error("❌ Error updating product:", error);
+            return null;
+        }
     },
     
     async delete(_id) {
-        const result = await Models.Product.findByIdAndDelete(_id);
-        return result;
+        try {
+            return await Models.Product.findByIdAndDelete(_id);
+        } catch (error) {
+            console.error("❌ Error deleting product:", error);
+            return null;
+        }
     },
 
     async selectByID(_id) {
-        const product = await Models.Product.findById(_id).exec();
-        return product;
+        try {
+            return await Models.Product.findById(_id);
+        } catch (error) {
+            console.error(`❌ Error fetching product with ID: ${_id}`, error);
+            return null;
+        }
     },
 
     async selectTopNew(top) {
-        const query = {};
-        const mysort = {cdate: -1};
-        const products = await Models.Product.find(query).sort(mysort).limit(top).exec();
-        return products;
+        try {
+            return await Models.Product.find({}).sort({ cdate: -1 }).limit(top);
+        } catch (error) {
+            console.error("❌ Error fetching top new products:", error);
+            return [];
+        }
     },
 
     async selectTopHot(top) {
-        const items = await Models.Order.aggregate([
-            {$match: {status: 'APPROVED'}},
-            {$unwind: '$items'},
-            {$group: {_id: '$items.product._id', sum: {$sum: '$items.quantity'}}},
-            {$sort: {sum: -1}}, //Giảm dần
-            {$limit: top}
-        ]).exec();
-        var products = [];
-        for (const item of items) {
-            const product = await ProductDAO.selectByID(item._id);
-            products.push(product);
+        try {
+            const items = await Models.Order.aggregate([
+                { $match: { status: 'APPROVED' } },
+                { $unwind: '$items' },
+                { $group: { _id: '$items.product._id', sum: { $sum: '$items.quantity' } } },
+                { $sort: { sum: -1 } },
+                { $limit: top }
+            ]);
+
+            const productIds = items.map(item => item._id);
+            return await Models.Product.find({ _id: { $in: productIds } });
+        } catch (error) {
+            console.error("❌ Error fetching top hot products:", error);
+            return [];
         }
-        return products;
     },
 
     async selectByCatID(_cid) {
-        const query = {'category._id': _cid};
-        const products = await Models.Product.find(query).exec();
-        return products;
+        try {
+            return await Models.Product.find({ 'category._id': _cid });
+        } catch (error) {
+            console.error(`❌ Error fetching products by category ID: ${_cid}`, error);
+            return [];
+        }
     },
 
     async selectByKeyword(keyword) {
-        const query = {name: {$regex: new RegExp(keyword, "i")}};
-        const products = await Models.Product.find(query).exec();
-        return products;
+        try {
+            return await Models.Product.find({ name: { $regex: new RegExp(keyword, "i") } });
+        } catch (error) {
+            console.error(`❌ Error fetching products by keyword: ${keyword}`, error);
+            return [];
+        }
     }
 };
 

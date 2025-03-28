@@ -48,13 +48,15 @@ const OrderSchema = mongoose.Schema({
 }, {versionKey: false});
 
 const CartSchema = mongoose.Schema({
-    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
+    _id: mongoose.Schema.Types.ObjectId, // Thêm _id cho đồng nhất với các schema khác
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true }, // Thay customerId bằng customer dùng ref
     items: [
         {
-            productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+            product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true }, // Thay productId bằng product
             quantity: { type: Number, required: true, default: 1 },
         }
-    ]
+    ],
+    cdate: { type: Number, default: Date.now } // Thêm thời gian tạo giỏ hàng
 }, { versionKey: false });
 
 //Models

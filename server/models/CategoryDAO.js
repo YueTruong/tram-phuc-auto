@@ -1,5 +1,6 @@
 require('../utils/MongooseUtil');
 const Models = require('./Models');
+const mongoose = require('mongoose'); // Chỉ require mongoose một lần
 
 const CategoryDAO = {
     async selectAll() {
@@ -12,26 +13,44 @@ const CategoryDAO = {
     },
     
     async insert(category) {
-        const mongoose = require('mongoose');
-        category._id = new mongoose.Types.ObjectId();
-        const result = await Models.Category.create(category);
-        return result;
+        try {
+            category._id = new mongoose.Types.ObjectId();
+            return await Models.Category.create(category);
+        } catch (error) {
+            console.error("❌ Error inserting category:", error);
+            return null;
+        }
     },
 
     async update(category) {
-        const newvalues = {name: category.name}
-        const result = await Models.Category.findByIdAndUpdate(category._id, newvalues, {new: true});
-        return result;
+        try {
+            return await Models.Category.findByIdAndUpdate(
+                category._id, 
+                { name: category.name },
+                { new: true } // Trả về dữ liệu đã cập nhật
+            );
+        } catch (error) {
+            console.error("❌ Error updating category:", error);
+            return null;
+        }
     },
 
     async delete(_id) {
-        const result = await Models.Category.findByIdAndDelete(_id);
-        return result;
+        try {
+            return await Models.Category.findByIdAndDelete(_id);
+        } catch (error) {
+            console.error("❌ Error deleting category:", error);
+            return null;
+        }
     },
     
     async selectByID(_id) {
-        const category = await Models.Category.findById(_id).exec();
-        return category;
+        try {
+            return await Models.Category.findById(_id).exec();
+        } catch (error) {
+            console.error("❌ Error fetching category by ID:", error);
+            return null;
+        }
     },
 };
 

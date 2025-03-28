@@ -1,20 +1,35 @@
-const { Cart } = require("./Models");
+const Models = require("./Models");
 
 const CartDAO = {
     async getCart(customerId) {
-        return await Cart.findOne({ customerId }).populate("items.productId");
+        try {
+            return await Models.Cart.findOne({ customerId }).populate("items.productId");
+        } catch (error) {
+            console.error("❌ Error fetching cart:", error);
+            return null;
+        }
     },
 
     async updateCart(customerId, items) {
-        return await Cart.findOneAndUpdate(
-            { customerId },
-            { items },
-            { upsert: true, new: true }
-        );
+        try {
+            return await Models.Cart.findOneAndUpdate(
+                { customerId },
+                { items },
+                { upsert: true, new: true }
+            );
+        } catch (error) {
+            console.error("❌ Error updating cart:", error);
+            return null;
+        }
     },
 
     async clearCart(customerId) {
-        return await Cart.deleteOne({ customerId });
+        try {
+            return await Models.Cart.deleteOne({ customerId });
+        } catch (error) {
+            console.error("❌ Error clearing cart:", error);
+            return null;
+        }
     }
 };
 
