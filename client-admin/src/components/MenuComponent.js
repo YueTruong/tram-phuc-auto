@@ -17,8 +17,8 @@ class Menu extends Component {
                             <li className="nav-item"><Link className="nav-link" to="/admin/home">Home</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/admin/category">Category</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/admin/product">Product</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/admin/orders">Order</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="">Customer</Link></li>
+                            <li className="nav-item"><Link className="nav-link" to="/admin/order">Order</Link></li>
+                            <li className="nav-item"><Link className="nav-link" to="/admin/customer">Customer</Link></li>
                         </ul>
                         <span className="navbar-text">
                             Hello <b>{this.context.username}</b> | 

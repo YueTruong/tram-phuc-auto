@@ -111,7 +111,7 @@ router.delete('/products/:id', JwtUtil.checkToken, async function (req, res) {
 });
 
 // API lấy danh sách đơn hàng
-router.get("/orders", JwtUtil.checkToken, async (req, res) => {
+router.get("/order", JwtUtil.checkToken, async (req, res) => {
     try {
         const orders = await Order.find()
             .populate("customer", "name email phone")
