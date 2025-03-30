@@ -1,73 +1,49 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import MyContext from "../contexts/MyContext";
-import axios from "axios";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import MyContext from '../contexts/MyContext';
 
 class Inform extends Component {
-    static contextType = MyContext;
+  static contextType = MyContext; // using this.context to access global state
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            customer: null,
-            showCart: false,
-        };
-    }
+  render() {
+    return (
+      <div className="container-fluid bg-light py-0 border-bottom w-100">
+        <div className="row align-items-center">
+          {/* Cột bên trái: Thông tin đăng nhập */}
+          <div className="col-md-8 text-start">
+            {this.context.token === '' ? (
+              <div>
+                <Link to='/login' className="btn">Login</Link> 
+                <span className="text-muted">|</span>
+                <Link to='/signup' className="btn">Sign-up</Link> 
+                <span className="text-muted">|</span>
+                <Link to='/active' className="btn">Active</Link>
+              </div>
+            ) : (
+              <div>
+                  <span className="me-3">Hello <b>{this.context.customer?.name}</b></span> 
+                  <span className="text-muted">|</span>
+                  <Link to='/home' className="btn" onClick={() => this.lnkLogoutClick()}>Logout</Link> 
+                  <span className="text-muted">|</span>
+                  <Link to='/myprofile' className="btn">My profile</Link> 
+                  <span className="text-muted">|</span>
+              </div>
+            )}
+          </div>
+          {/* Cột bên phải: Giỏ hàng */}
+          <div className="col-md-4 text-end">
+            <Link to='/cart' className="btn">My cart ({this.context.mycart.length} items)</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    componentDidMount() {
-        this.fetchCustomer();
-        window.addEventListener("customerUpdated", this.fetchCustomer);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("customerUpdated", this.fetchCustomer);
-    }
-
-    fetchCustomer = async () => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            try {
-                const res = await axios.get("/api/customer/me", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                this.setState({ customer: res.data });
-            } catch (error) {
-                console.error("Error fetching customer:", error);
-            }
-        }
-    };
-
-    handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("customer");
-        this.setState({ customer: null });
-        window.location.href = "/";
-    };
-
-    toggleCartPreview = (show) => {
-        this.setState({ showCart: show });
-    };
-
-    render() {
-        const { cart = [] } = this.context || {}; // Đảm bảo cart luôn có giá trị mặc định
-    
-        return (
-            <div className="border-bottom bg-light py-2 shadow-sm">
-                <div className="container d-flex justify-content-between align-items-center">
-                    <div>
-                        <Link to="/register" className="text-decoration-none me-3 text-dark">Sign-up</Link>
-                        <Link to="/login" className="text-decoration-none me-3 text-dark">Login</Link>
-                        <Link to="/activate" className="text-decoration-none text-dark">Activate</Link>
-                    </div>
-                    <div className="position-relative">
-                        <Link to="/cart" className="text-decoration-none text-dark">
-                            My cart ({cart.length} items)
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+  // event-handlers
+  lnkLogoutClick() {
+    this.context.setToken('');
+    this.context.setCustomer(null);
+  }
 }
 
 export default Inform;

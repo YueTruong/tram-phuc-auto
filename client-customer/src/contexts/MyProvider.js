@@ -7,10 +7,10 @@ class MyProvider extends Component {
         super(props);
         this.state = {
             token: localStorage.getItem("token") || "",
-            username: "",
-            cart: [],
+            customer: null,
+            mycart: [],
             setToken: this.setToken,
-            setUsername: this.setUsername,
+            setCustomer: this.setCustomer,
             fetchCart: this.fetchCart,
             addToCart: this.addToCart,
             removeFromCart: this.removeFromCart,
@@ -30,13 +30,13 @@ class MyProvider extends Component {
             if (value) {
                 this.fetchCart();
             } else {
-                this.setState({ cart: [] });
+                this.setState({ mycart: [] });
             }
         });
     };
 
-    setUsername = (value) => {
-        this.setState({ username: value });
+    setCustomer = (value) => {
+        this.setState({ customer: value });
     };
 
     fetchCart = async () => {
@@ -45,32 +45,32 @@ class MyProvider extends Component {
             const res = await axios.get("/api/customer/cart", {
                 headers: { Authorization: `Bearer ${this.state.token}` },
             });
-            this.setState({ cart: res.data.items || [] });
+            this.setState({ mycart: res.data.items || [] });
         } catch (error) {
             console.error("Error fetching cart:", error);
         }
     };
 
     addToCart = async (product, quantity) => {
-        const updatedCart = [...this.state.cart];
+        const updatedCart = [...this.state.mycart];
         const existingItem = updatedCart.find((item) => item._id === product._id);
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
             updatedCart.push({ ...product, quantity });
         }
-        this.setState({ cart: updatedCart });
+        this.setState({ mycart: updatedCart });
         await this.syncCartWithBackend(updatedCart);
     };
 
     removeFromCart = async (productId) => {
-        const updatedCart = this.state.cart.filter((item) => item._id !== productId);
-        this.setState({ cart: updatedCart });
+        const updatedCart = this.state.mycart.filter((item) => item._id !== productId);
+        this.setState({ mycart: updatedCart });
         await this.syncCartWithBackend(updatedCart);
     };
 
     clearCart = async () => {
-        this.setState({ cart: [] });
+        this.setState({ mycart: [] });
         if (this.state.token) {
             await axios.delete("/api/customer/cart", {
                 headers: { Authorization: `Bearer ${this.state.token}` },
@@ -79,10 +79,10 @@ class MyProvider extends Component {
     };
 
     updateCartQuantity = async (productId, newQuantity) => {
-        const updatedCart = this.state.cart.map((item) =>
+        const updatedCart = this.state.mycart.map((item) =>
             item._id === productId ? { ...item, quantity: newQuantity } : item
         );
-        this.setState({ cart: updatedCart });
+        this.setState({ mycart: updatedCart });
         await this.syncCartWithBackend(updatedCart);
     };
 

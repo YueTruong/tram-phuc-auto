@@ -17,7 +17,7 @@ class Order extends Component {
     fetchOrders = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("/api/admin/order", {
+            const response = await axios.get("/api/admin/orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             
