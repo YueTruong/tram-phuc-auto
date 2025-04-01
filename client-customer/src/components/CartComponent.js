@@ -16,12 +16,13 @@ class Cart extends Component {
     handleQuantityChange = (productId, newQuantity) => {
         if (newQuantity < 1) newQuantity = 1;
         if (newQuantity > 99) newQuantity = 99;
+    
         this.context.updateCartQuantity(productId, newQuantity);
     };
 
     handleCheckout = async () => {
-        const { cart, clearCart } = this.context;
-        if (cart.length === 0) {
+        const { mycart, clearCart } = this.context;
+        if (mycart.length === 0) {
             this.setState({ message: "Your cart is empty!" });
             return;
         }
@@ -36,13 +37,13 @@ class Cart extends Component {
 
         try {
             const orderData = {
-                items: cart.map((item) => ({
+                items: mycart.map((item) => ({
                     productId: item.productId,
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price,
                 })),
-                total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                total: mycart.reduce((sum, item) => sum + item.price * item.quantity, 0),
             };
 
             const response = await axios.post("/api/customer/orders", orderData, {
@@ -62,15 +63,15 @@ class Cart extends Component {
     };
 
     render() {
-        const { cart = [], removeFromCart } = this.context || { cart: [], removeFromCart: () => {} };
+        const { mycart = [], removeFromCart } = this.context;
         const { loading, message } = this.state;
-        const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalPrice = mycart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         return (
             <div className="container mt-4">
                 <h2>Your Cart</h2>
                 {message && <div className="alert alert-info">{message}</div>}
-                {cart.length === 0 ? (
+                {mycart.length === 0 ? (
                     <p>Your cart is empty.</p>
                 ) : (
                     <div>
@@ -85,7 +86,7 @@ class Cart extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {cart.map((item) => (
+                                {mycart.map((item) => (
                                     <tr key={item.productId}>
                                         <td>{item.name}</td>
                                         <td>${item.price.toFixed(2)}</td>
@@ -97,7 +98,7 @@ class Cart extends Component {
                                                 value={item.quantity}
                                                 min="1"
                                                 max="99"
-                                                onChange={(e) => this.handleQuantityChange(item.productId, parseInt(e.target.value))}
+                                                onChange={(e) => this.handleQuantityChange(item._id, parseInt(e.target.value) || 1)}
                                             />
                                         </td>
                                         <td className="fw-bold">${(item.price * item.quantity).toFixed(2)}</td>

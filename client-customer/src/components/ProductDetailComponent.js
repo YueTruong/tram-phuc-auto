@@ -33,15 +33,12 @@ class ProductDetail extends Component {
     };
 
     addToCart = () => {
-        const { addToCart } = this.context || { addToCart: () => {} }; // ✅ Tránh lỗi undefined
-        const product = {
-            productId: this.props.productId,
-            name: this.props.name,
-            price: this.props.price,
-            quantity: 1,
-        };
-
-        addToCart(product);  // ✅ Nếu `addToCart` chưa có, nó sẽ không gây lỗi
+        const { addToCart } = this.context || { addToCart: () => {} };
+        const { product, quantity } = this.state;
+    
+        if (!product) return;
+    
+        addToCart(product, quantity);
     };
 
     render() {
