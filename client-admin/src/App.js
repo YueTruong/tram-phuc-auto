@@ -1,5 +1,3 @@
-//CLI: npm install axios --save
-// import logo from './logo.svg';
 import './App.css';
 import React, {Component} from 'react';
 import MyProvider from './contexts/MyProvider';

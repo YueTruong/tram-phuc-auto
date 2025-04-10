@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 import MyContext from '../contexts/MyContext';
 
 class Inform extends Component {
@@ -13,33 +13,29 @@ class Inform extends Component {
           <div className="col-md-8 text-start">
             {this.context.token === '' ? (
               <div>
-                <Link to='/login' className="btn">Login</Link> 
+                <Link to='/register' className="btn">Register</Link>
                 <span className="text-muted">|</span>
-                <Link to='/signup' className="btn">Sign-up</Link> 
+                <Link to='/login' className="btn">Login</Link>
                 <span className="text-muted">|</span>
                 <Link to='/active' className="btn">Active</Link>
               </div>
             ) : (
               <div>
-                  <span className="me-3">Hello <b>{this.context.customer?.name}</b></span> 
+                  <span className="me-3">Hello <b>{this.context.customer.name}</b></span> 
                   <span className="text-muted">|</span>
                   <Link to='/home' className="btn" onClick={() => this.lnkLogoutClick()}>Logout</Link> 
                   <span className="text-muted">|</span>
-                  <Link to='/myprofile' className="btn">My profile</Link> 
+                  <Link to='/myprofile' className="btn">My Profile</Link> 
                   <span className="text-muted">|</span>
               </div>
             )}
-          </div>
-          {/* Cột bên phải: Giỏ hàng */}
-          <div className="col-md-4 text-end">
-            <Link to='/cart' className="btn">My cart ({this.context.mycart.length} items)</Link>
-          </div>
+          </div>     
         </div>
       </div>
     );
   }
 
-  // event-handlers
+  //Event-handlers
   lnkLogoutClick() {
     this.context.setToken('');
     this.context.setCustomer(null);

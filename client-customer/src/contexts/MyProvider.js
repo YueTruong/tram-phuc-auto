@@ -6,9 +6,10 @@ class MyProvider extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            token: localStorage.getItem("token") || "",
+            token: '',
             customer: null,
             mycart: [],
+
             setToken: this.setToken,
             setCustomer: this.setCustomer,
             fetchCart: this.fetchCart,
@@ -26,17 +27,11 @@ class MyProvider extends Component {
     }
 
     setToken = (value) => {
-        this.setState({ token: value }, () => {
-            if (value) {
-                this.fetchCart();
-            } else {
-                this.setState({ mycart: [] });
-            }
-        });
-    };
+        this.setState({token: value});
+    }
 
     setCustomer = (value) => {
-        this.setState({ customer: value });
+        this.setState({customer: value});
     };
 
     fetchCart = async () => {

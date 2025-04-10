@@ -13,12 +13,15 @@ class MyProvider extends Component {
             setUsername: this.setUsername
         };
     }
+
     setToken = (value) => {
         this.setState({token: value});
     }
+
     setUsername = (value) => {
         this.setState({username: value});
     }
+    
     render() {
         return (
             <MyContext.Provider value={this.state}>

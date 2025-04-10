@@ -130,14 +130,16 @@ router.get("/orders", JwtUtil.checkToken, async (req, res) => {
 router.get('/customers', JwtUtil.checkToken, async function (req, res) {
     const customers = await CustomerDAO.selectAll();
     res.json(customers);
-  });
-  router.put('/customers/deactive/:id', JwtUtil.checkToken, async function (req, res) {
+});
+
+router.put('/customers/deactive/:id', JwtUtil.checkToken, async function (req, res) {
     const _id = req.params.id;
     const token = req.body.token;
     const result = await CustomerDAO.active(_id, token, 0);
     res.json(result);
-  });
-  router.get('/customers/sendmail/:id', JwtUtil.checkToken, async function (req, res) {
+});
+
+router.get('/customers/sendmail/:id', JwtUtil.checkToken, async function (req, res) {
     const _id = req.params.id;
     const cust = await CustomerDAO.selectByID(_id);
     if (cust) {
@@ -150,6 +152,6 @@ router.get('/customers', JwtUtil.checkToken, async function (req, res) {
     } else {
       res.json({ success: false, message: 'Not exists customer' });
     }
-  });
+});
 
 module.exports = router;

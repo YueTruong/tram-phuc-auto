@@ -29,6 +29,7 @@ class Menu extends Component {
             </nav>
         );
     }
+    
     //Event-handlers
     lnkLogoutClick() {
         this.context.setToken('');

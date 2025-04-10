@@ -1,56 +1,63 @@
-import axios from "axios";
 import React, { Component } from "react";
+import axios from "axios";
 import MyContext from "../contexts/MyContext";
-import withRouter from "../utils/withRouter";
 
-class Cart extends Component {
+class Checkout extends Component {
     static contextType = MyContext;
 
     constructor(props) {
         super(props);
         this.state = {
-            loading: false, // Trạng thái khi xử lý checkout
-            message: "", // Lưu thông báo checkout
+            address: "",
+            phone: "",
+            loading: false,
+            message: "",
         };
     }
 
-    handleQuantityChange = (productId, newQuantity) => {
-        if (newQuantity < 1) newQuantity = 1;
-        if (newQuantity > 99) newQuantity = 99;
-    
-        this.context.updateCartQuantity(productId, newQuantity);
+    handleInputChange = (event) => {
+        this.setState({ [event.target.name]: event.target.value });
     };
 
     handleCheckout = async () => {
         const { mycart, clearCart } = this.context;
+        const { address, phone } = this.state;
+
         if (mycart.length === 0) {
             this.setState({ message: "Your cart is empty!" });
             return;
         }
-    
-        const token = localStorage.getItem("token");
-        if (!token) {
-            this.setState({ message: "Please login before checkout." });
+
+        if (!address || !phone) {
+            this.setState({ message: "Please enter your address and phone number." });
             return;
         }
-    
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            this.setState({ message: "Please log in before checking out." });
+            return;
+        }
+
         this.setState({ loading: true, message: "" });
-    
+
         try {
             const orderData = {
                 items: mycart.map((item) => ({
-                    productId: item._id, // ✅ FIXED HERE
+                    productId: item._id,
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price,
                 })),
                 total: mycart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                address,
+                phone,
             };
-    
+
             const response = await axios.post("/api/customer/orders", orderData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-    
+
             if (response.status === 201) {
                 this.setState({ message: "Order placed successfully!" });
                 clearCart();
@@ -59,20 +66,20 @@ class Cart extends Component {
             this.setState({ message: "Failed to place order. Please try again." });
             console.error("Checkout error:", error);
         }
-    
+
         this.setState({ loading: false });
-        this.props.navigate("/checkout");
     };
 
     render() {
-        const { mycart = [], removeFromCart } = this.context;
-        const { message } = this.state;
+        const { mycart = [] } = this.context;
+        const { address, phone, loading, message } = this.state;
         const totalPrice = mycart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         return (
             <div className="container mt-4">
-                <h2>Your Cart</h2>
+                <h2>Checkout</h2>
                 {message && <div className="alert alert-info">{message}</div>}
+
                 {mycart.length === 0 ? (
                     <p>Your cart is empty.</p>
                 ) : (
@@ -84,43 +91,52 @@ class Cart extends Component {
                                     <th>Price</th>
                                     <th>Quantity</th>
                                     <th>Total</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {mycart.map((item) => (
-                                    <tr key={item.productId}>
+                                    <tr key={item._id}>
                                         <td>{item.name}</td>
                                         <td>${item.price.toFixed(2)}</td>
-                                        <td>
-                                            <input
-                                                type="number"
-                                                className="form-control"
-                                                style={{ width: "60px" }}
-                                                value={item.quantity}
-                                                min="1"
-                                                max="99"
-                                                onChange={(e) => this.handleQuantityChange(item._id, parseInt(e.target.value) || 1)}
-                                            />
-                                        </td>
+                                        <td>{item.quantity}</td>
                                         <td className="fw-bold">${(item.price * item.quantity).toFixed(2)}</td>
-                                        <td>
-                                            <button className="btn btn-sm btn-danger" onClick={() => removeFromCart(item.productId)}>
-                                                Remove
-                                            </button>
-                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
 
-                        <div className="d-flex justify-content-between align-items-center border-top pt-3">
-                            <h5>Total:</h5>
-                            <h5 className="fw-bold text-success">${totalPrice.toFixed(2)}</h5>
+                        <div className="border-top pt-3">
+                            <h5>Total: <span className="fw-bold text-success">${totalPrice.toFixed(2)}</span></h5>
                         </div>
 
-                        <button className="btn btn-primary mt-3 w-100" onClick={this.handleCheckout}>
-                            Proceed to Checkout
+                        <div className="mt-4">
+                            <label className="form-label">Address:</label>
+                            <input
+                                type="text"
+                                name="address"
+                                className="form-control"
+                                value={address}
+                                onChange={this.handleInputChange}
+                                required
+                            />
+
+                            <label className="form-label mt-3">Phone:</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                className="form-control"
+                                value={phone}
+                                onChange={this.handleInputChange}
+                                required
+                            />
+                        </div>
+
+                        <button
+                            className="btn btn-success mt-3 w-100"
+                            onClick={this.handleCheckout}
+                            disabled={loading}
+                        >
+                            {loading ? "Processing..." : "Place Order"}
                         </button>
                     </div>
                 )}
@@ -129,4 +145,4 @@ class Cart extends Component {
     }
 }
 
-export default withRouter(Cart);
+export default Checkout;

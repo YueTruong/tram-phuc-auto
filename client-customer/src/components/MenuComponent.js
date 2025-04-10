@@ -12,33 +12,6 @@ class Menu extends Component {
         };
     }
 
-    componentDidMount() {
-        this.apiGetCategories();
-    }
-
-    // Handle input change
-    handleInputChange = (e) => {
-        this.setState({ txtKeyword: e.target.value });
-    };
-
-    // Handle search button click
-    btnSearchClick = (e) => {
-        e.preventDefault();
-        if (this.state.txtKeyword.trim()) {
-            this.props.navigate(`/product/search/${this.state.txtKeyword}`);
-        }
-    };
-
-    // Fetch categories from API
-    apiGetCategories = async () => {
-        try {
-            const res = await axios.get("/api/customer/categories");
-            this.setState({ categories: res.data });
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-        }
-    };
-
     render() {
         return (
             <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
@@ -89,6 +62,32 @@ class Menu extends Component {
             </nav>
         );
     }
+
+    componentDidMount() {
+        this.apiGetCategories();
+    }
+
+    handleInputChange = (e) => {
+        this.setState({ txtKeyword: e.target.value });
+    };
+
+    //Event-handlers
+    btnSearchClick = (e) => {
+        e.preventDefault();
+        if (this.state.txtKeyword.trim()) {
+            this.props.navigate(`/product/search/${this.state.txtKeyword}`);
+        }
+    };
+
+    //APIs
+    apiGetCategories = async () => {
+        try {
+            const res = await axios.get("/api/customer/categories");
+            this.setState({ categories: res.data });
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
 }
 
 export default withRouter(Menu);
