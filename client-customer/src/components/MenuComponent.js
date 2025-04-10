@@ -14,8 +14,8 @@ class Menu extends Component {
 
     render() {
         return (
-            <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
-                <div className="container">
+            <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top w-100">
+                <div className="container-fluid">
                     <Link className="navbar-brand fw-bold" to="/">Trâm Phúc Auto</Link>
                     <button
                         className="navbar-toggler"

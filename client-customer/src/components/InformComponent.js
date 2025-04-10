@@ -7,7 +7,7 @@ class Inform extends Component {
 
   render() {
     return (
-      <div className="container-fluid bg-light py-0 border-bottom w-100">
+      <div className="container-fluid bg-light py-0 border-bottom w-100" style={{marginTop: '56px'}}>
         <div className="row align-items-center">
           {/* Cột bên trái: Thông tin đăng nhập */}
           <div className="col-md-8 text-start">
