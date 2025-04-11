@@ -14,33 +14,6 @@ class ProductDetail extends Component {
         };
     }
 
-    componentDidMount() {
-        this.apiGetProduct(this.props.params.id);
-    }
-
-    apiGetProduct = async (id) => {
-        try {
-            const res = await axios.get(`/api/customer/products/${id}`);
-            this.setState({ product: res.data });
-        } catch (error) {
-            console.error("Error fetching product details:", error);
-            this.setState({ product: "error" });
-        }
-    };
-
-    handleQuantityChange = (event) => {
-        this.setState({ quantity: parseInt(event.target.value, 10) || 1 });
-    };
-
-    addToCart = () => {
-        const { addToCart } = this.context || { addToCart: () => {} };
-        const { product, quantity } = this.state;
-    
-        if (!product) return;
-    
-        addToCart(product, quantity);
-    };
-
     render() {
         const { product, quantity } = this.state;
 
@@ -105,6 +78,33 @@ class ProductDetail extends Component {
             </div>
         );
     }
+
+    componentDidMount() {
+        this.apiGetProduct(this.props.params.id);
+    }
+
+    apiGetProduct = async (id) => {
+        try {
+            const res = await axios.get(`/api/customer/products/${id}`);
+            this.setState({ product: res.data });
+        } catch (error) {
+            console.error("Error fetching product details:", error);
+            this.setState({ product: "error" });
+        }
+    };
+
+    handleQuantityChange = (event) => {
+        this.setState({ quantity: parseInt(event.target.value, 10) || 1 });
+    };
+
+    addToCart = () => {
+        const { addToCart } = this.context || { addToCart: () => {} };
+        const { product, quantity } = this.state;
+    
+        if (!product) return;
+    
+        addToCart(product, quantity);
+    };
 }
 
 export default withRouter(ProductDetail);
