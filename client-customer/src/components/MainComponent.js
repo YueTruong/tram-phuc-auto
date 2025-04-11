@@ -16,7 +16,6 @@ import MyProfile from "./MyProfileComponent";
 class Main extends Component {
     static contextType = MyContext; // using this.context to access global state
     render() {
-        // if (this.context.token !== '') {
             return (
                 <div className="body-customer">
                     <Menu />
@@ -36,8 +35,6 @@ class Main extends Component {
                     </Routes>
                 </div>
             );
-        // }
-        // return (<div />)
     }
 }
 

@@ -67,6 +67,7 @@ class Login extends Component {
             if (result.success === true) {
                 this.context.setToken(result.token);
                 this.context.setUsername(account.username);
+                this.props.router.navigate('/home'); // ✅ Redirect to home or wherever
             } else {
                 alert(result.message);
             }
