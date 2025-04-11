@@ -54,7 +54,7 @@ router.post('/register', async (req, res) => {
     try {
         const { username, password, name, phone, email } = req.body;
         if (!username || !password || !email) {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({success: false, message: 'Missing required fields' });
         }
 
         // Check if username or email already exists
@@ -100,26 +100,27 @@ router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({ success: false, message: 'Username and password required' });
         }
 
-        // Hash password and find user
-        const hashedPassword = CryptoUtil.md5(password);
+        const hashedPassword = CryptoUtil.md5(password); // Mã hóa password
+
         const customer = await CustomerDAO.selectByUsernameAndPassword(username, hashedPassword);
-
         if (!customer) {
-            return res.status(401).json({ message: 'Invalid username or password' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        if (customer.active === 0) {
-            return res.status(403).json({ message: 'Account is not activated' });
-        }
-
-        const token = JwtUtil.genToken(username, customer.password);
-        res.status(200).json({ message: 'Login successful', token, customer });
+        const token = JwtUtil.genToken(username, hashedPassword); // cũng nên dùng password đã mã hóa khi tạo token
+        res.json({ success: true, message: 'Authentication successful', token });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("❌ Login error:", error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
+});
+
+router.get('/token', JwtUtil.checkToken, function (req, res) {
+    const token = req.headers['x-access-token'] || req.headers['authorization'];
+    res.json({success: true, message: 'Token is valid', token: token});
 });
 
 // Activate account
