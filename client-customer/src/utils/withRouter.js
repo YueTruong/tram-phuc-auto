@@ -1,14 +1,12 @@
-import {useNavigate, useParams, useLocation} from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function withRouter(Component) {
     function ComponentWithRouterProp(props) {
-        let navigate = useNavigate();
         let params = useParams();
-        let location = useLocation();
-        return (
-            <Component {...props} router={{ navigate, params, location }}/>
-        );
+        let navigate = useNavigate();
+        return <Component {...props} params={params} navigate={navigate} />;
     }
+
     return ComponentWithRouterProp;
 }
 
