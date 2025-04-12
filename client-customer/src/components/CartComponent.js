@@ -9,15 +9,14 @@ class Cart extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading: false, // Trạng thái khi xử lý checkout
-            message: "", // Lưu thông báo checkout
+            loading: false,
+            message: "",
         };
     }
 
     handleQuantityChange = (productId, newQuantity) => {
         if (newQuantity < 1) newQuantity = 1;
         if (newQuantity > 99) newQuantity = 99;
-    
         this.context.updateCartQuantity(productId, newQuantity);
     };
 
@@ -27,41 +26,35 @@ class Cart extends Component {
             this.setState({ message: "Your cart is empty!" });
             return;
         }
-    
-        const token = localStorage.getItem("token");
+        const token = this.context.token; // Use context token
         if (!token) {
             this.setState({ message: "Please login before checkout." });
             return;
         }
-    
         this.setState({ loading: true, message: "" });
-    
         try {
             const orderData = {
                 items: mycart.map((item) => ({
-                    productId: item._id, // ✅ FIXED HERE
+                    productId: item._id,
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price,
                 })),
                 total: mycart.reduce((sum, item) => sum + item.price * item.quantity, 0),
             };
-    
             const response = await axios.post("/api/customer/orders", orderData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-    
             if (response.status === 201) {
                 this.setState({ message: "Order placed successfully!" });
                 clearCart();
+                this.props.navigate("/checkout"); // Navigate after clearing
             }
         } catch (error) {
             this.setState({ message: "Failed to place order. Please try again." });
             console.error("Checkout error:", error);
         }
-    
         this.setState({ loading: false });
-        this.props.navigate("/checkout");
     };
 
     render() {
@@ -89,7 +82,7 @@ class Cart extends Component {
                             </thead>
                             <tbody>
                                 {mycart.map((item) => (
-                                    <tr key={item.productId}>
+                                    <tr key={item._id}>
                                         <td>{item.name}</td>
                                         <td>${item.price.toFixed(2)}</td>
                                         <td>
@@ -105,7 +98,7 @@ class Cart extends Component {
                                         </td>
                                         <td className="fw-bold">${(item.price * item.quantity).toFixed(2)}</td>
                                         <td>
-                                            <button className="btn btn-sm btn-danger" onClick={() => removeFromCart(item.productId)}>
+                                            <button className="btn btn-sm btn-danger" onClick={() => removeFromCart(item._id)}>
                                                 Remove
                                             </button>
                                         </td>
@@ -113,12 +106,10 @@ class Cart extends Component {
                                 ))}
                             </tbody>
                         </table>
-
                         <div className="d-flex justify-content-between align-items-center border-top pt-3">
                             <h5>Total:</h5>
                             <h5 className="fw-bold text-success">${totalPrice.toFixed(2)}</h5>
                         </div>
-
                         <button className="btn btn-primary mt-3 w-100" onClick={this.handleCheckout}>
                             Proceed to Checkout
                         </button>

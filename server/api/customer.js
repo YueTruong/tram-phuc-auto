@@ -199,49 +199,6 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Middleware kiểm tra đăng nhập
-const authenticate = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    try {
-        const decoded = JwtUtil.checkToken(token);
-        req.customer = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ message: "Invalid token" });
-    }
-};
-
-// Order
-router.post("/order", authenticate, async (req, res) => {
-    try {
-        const { items, total } = req.body;
-        const newOrder = {
-            customer: req.customer._id,
-            items,
-            total,
-            status: "Pending",
-            cdate: new Date(),
-        };
-
-        const result = await OrderDAO.createOrder(newOrder);
-        res.status(201).json({ success: true, message: "Order placed successfully!", order: result });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Order history
-router.get("/orders", authenticate, async (req, res) => {
-    try {
-        const orders = await OrderDAO.getOrdersByCustomer(req.customer._id);
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
 // Middleware to verify customer token
 const verifyCustomer = async (req, res, next) => {
     try {
@@ -261,7 +218,7 @@ const verifyCustomer = async (req, res, next) => {
 };
 
 // Get customer cart
-router.get("/cart", verifyCustomer, async (req, res) => {
+router.get("/api/customer/cart", verifyCustomer, async (req, res) => {
     try {
         const cart = await CartDAO.getCart(req.customer._id);
         res.json(cart || { items: [] });
@@ -271,7 +228,7 @@ router.get("/cart", verifyCustomer, async (req, res) => {
 });
 
 // Update cart
-router.post("/cart", verifyCustomer, async (req, res) => {
+router.post("/api/customer/cart", verifyCustomer, async (req, res) => {
     try {
         const { items } = req.body;
         const updatedCart = await CartDAO.updateCart(req.customer._id, items);
@@ -282,7 +239,7 @@ router.post("/cart", verifyCustomer, async (req, res) => {
 });
 
 // Clear cart
-router.delete("/cart", verifyCustomer, async (req, res) => {
+router.delete("/api/customer/cart", verifyCustomer, async (req, res) => {
     try {
         await CartDAO.clearCart(req.customer._id);
         res.json({ message: "Cart cleared" });
@@ -291,22 +248,38 @@ router.delete("/cart", verifyCustomer, async (req, res) => {
     }
 });
 
-// API tạo đơn hàng
-router.post("/orders", JwtUtil.checkToken, async (req, res) => {
+// Sync cart (new endpoint)
+router.post("/api/customer/cart/sync", verifyCustomer, async (req, res) => {
+    try {
+        const { items } = req.body;
+        const syncedCart = await CartDAO.syncCart(req.customer._id, items);
+        res.json(syncedCart);
+    } catch (error) {
+        res.status(500).json({ message: "Error syncing cart" });
+    }
+});
+
+// Fix order route path (replace existing /orders and /order routes)
+router.post("/api/customer/orders", verifyCustomer, async (req, res) => {
     try {
         const { items, total } = req.body;
-        const customerId = req.user._id;
-
-        const newOrder = new Order({
-            cdate: new Date(),
+        const newOrder = {
+            _id: new mongoose.Types.ObjectId(),
+            cdate: Date.now(),
             total,
             status: "Pending",
-            customer: customerId,
-            items,
-        });
-
-        await newOrder.save();
-        res.status(201).json({ message: "Order placed successfully" });
+            customer: req.customer,
+            items: items.map(item => ({
+                product: {
+                    _id: item.productId,
+                    name: item.name,
+                    price: item.price
+                },
+                quantity: item.quantity
+            }))
+        };
+        const result = await OrderDAO.createOrder(newOrder);
+        res.status(201).json({ message: "Order placed successfully", order: result });
     } catch (error) {
         console.error("Order creation failed:", error);
         res.status(500).json({ error: "Failed to place order" });
