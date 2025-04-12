@@ -55,20 +55,24 @@ class MyProvider extends Component {
         }
     };
 
-    addToCart = async (product, quantity) => {
+    addToCart = (product, quantity) => {
         if (!product || !product._id) return;
-        const updatedCart = [...this.state.mycart];
-        const existingItem = updatedCart.find((item) => item._id === product._id);
-        if (existingItem) {
-            existingItem.quantity += quantity;
-        } else {
-            updatedCart.push({ ...product, quantity });
-        }
-        this.setState({ mycart: updatedCart });
-        if (this.state.token) {
-            await this.syncCartWithBackend(updatedCart);
-        }
-    };
+        this.setState(prevState => {
+            const updatedCart = [...prevState.mycart];
+            const existingItem = updatedCart.find(item => item._id === product._id);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                updatedCart.push({ ...product, quantity });
+            }
+    
+            if (prevState.token) {
+                this.syncCartWithBackend(updatedCart, prevState.token);
+            }
+    
+            return { mycart: updatedCart };
+        });
+    }
 
     removeFromCart = async (productId) => {
         const updatedCart = this.state.mycart.filter((item) => item._id !== productId);
@@ -98,12 +102,12 @@ class MyProvider extends Component {
         }
     };
 
-    syncCartWithBackend = async (updatedCart) => {
+    syncCartWithBackend = async (updatedCart, token) => {
         try {
             await axios.post(
                 "/api/customer/cart",
                 { items: updatedCart },
-                { headers: { Authorization: `Bearer ${this.state.token}` } }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
         } catch (error) {
             console.error("Error syncing cart with backend:", error);
