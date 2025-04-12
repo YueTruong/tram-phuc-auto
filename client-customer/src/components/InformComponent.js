@@ -29,7 +29,7 @@ class Inform extends Component {
                                 <span className="text-muted">|</span>
                                 <Link to='/myprofile' className="btn">My Profile</Link>
                                 <span className="text-muted">|</span>
-                                <Link to='/mycart' className="btn">
+                                <Link to='/cart' className="btn">
                                     My Cart ({totalItems} item{totalItems !== 1 ? 's' : ''})
                                 </Link>
                                 <span className="text-muted">|</span>
