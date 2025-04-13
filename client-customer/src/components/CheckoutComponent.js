@@ -14,48 +14,6 @@ class Checkout extends Component {
         };
     }
 
-    handleConfirmOrder = async () => {
-        const { mycart, clearCart } = this.context;
-        if (mycart.length === 0) {
-            this.setState({ message: "Your cart is empty!" });
-            return;
-        }
-        const token = this.context.token;
-        if (!token) {
-            this.setState({ message: "Please login before checkout." });
-            this.props.navigate("/login");
-            return;
-        }
-        this.setState({ loading: true, message: "" });
-        try {
-            const orderData = {
-                items: mycart.map((item) => {
-                    if (!item._id) throw new Error("Invalid product ID");
-                    return {
-                        productId: item._id,
-                        name: item.name,
-                        quantity: item.quantity,
-                        price: item.price,
-                    };
-                }),
-                total: mycart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-            };
-            console.log("Sending order data:", JSON.stringify(orderData, null, 2));
-            const response = await axios.post("/api/customer/orders", orderData, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.status === 201) {
-                this.setState({ message: "Order placed successfully!" });
-                clearCart();
-            }
-        } catch (error) {
-            console.error("Checkout error:", error);
-            const errorMessage = error.response?.data?.error || error.message || "Unknown error";
-            this.setState({ message: `Failed to place order: ${errorMessage}` });
-        }
-        this.setState({ loading: false });
-    };
-
     render() {
         const { mycart = [] } = this.context;
         const { message, loading } = this.state;
@@ -106,6 +64,48 @@ class Checkout extends Component {
             </div>
         );
     }
+
+    handleConfirmOrder = async () => {
+        const { mycart, clearCart } = this.context;
+        if (mycart.length === 0) {
+            this.setState({ message: "Your cart is empty!" });
+            return;
+        }
+        const token = this.context.token;
+        if (!token) {
+            this.setState({ message: "Please login before checkout." });
+            this.props.navigate("/login");
+            return;
+        }
+        this.setState({ loading: true, message: "" });
+        try {
+            const orderData = {
+                items: mycart.map((item) => {
+                    if (!item._id) throw new Error("Invalid product ID");
+                    return {
+                        productId: item._id,
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price,
+                    };
+                }),
+                total: mycart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+            };
+            console.log("Sending order data:", JSON.stringify(orderData, null, 2));
+            const response = await axios.post("/api/customer/orders", orderData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (response.status === 201) {
+                this.setState({ message: "Order placed successfully!" });
+                clearCart();
+            }
+        } catch (error) {
+            console.error("Checkout error:", error);
+            const errorMessage = error.response?.data?.error || error.message || "Unknown error";
+            this.setState({ message: `Failed to place order: ${errorMessage}` });
+        }
+        this.setState({ loading: false });
+    };
 }
 
 export default withRouter(Checkout);
