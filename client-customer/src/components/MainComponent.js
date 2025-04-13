@@ -12,6 +12,7 @@ import Activate from "./ActivateComponent";
 import Cart from "./CartComponent";
 import Checkout from "./CheckoutComponent";
 import MyProfile from "./MyProfileComponent";
+import Orders from "./OrderComponent";
 
 class Main extends Component {
     static contextType = MyContext; // using this.context to access global state
@@ -29,9 +30,10 @@ class Main extends Component {
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/activate" element={<Activate />} />
+                        <Route path="/myprofile" element={<MyProfile />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/checkout" element={<Checkout />} />
-                        <Route path="/myprofile" element={<MyProfile />} />
+                        <Route path="/orders" element={<Orders />} />
                     </Routes>
                 </div>
             );
