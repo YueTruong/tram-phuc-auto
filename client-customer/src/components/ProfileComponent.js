@@ -77,11 +77,6 @@ class Profile extends Component {
                                     <strong>Email:</strong> {customer.email}
                                 </li>
                             </ul>
-                            <div className="text-center">
-                                <button className="btn btn-outline-primary">
-                                    Edit Profile
-                                </button>
-                            </div>
                         </div>
                     </div>
                 ) : (
