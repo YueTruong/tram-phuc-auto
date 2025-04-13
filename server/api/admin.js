@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
 
-//Utils
+// Utils
 const JwtUtil = require('../utils/JwtUtil');
 
-//DAOs
+// DAOs
 const AdminDAO = require('../models/AdminDAO');
 const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
 const OrderDAO = require('../models/OrderDAO');
 const CustomerDAO = require('../models/CustomerDAO');
 const Models = require('../models/Models');
+const mongoose = require('mongoose');
 
-//Login
+// Login
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -35,10 +36,10 @@ router.post('/login', async (req, res) => {
 
 router.get('/token', JwtUtil.checkToken, function (req, res) {
     const token = req.headers['x-access-token'] || req.headers['authorization'];
-    res.json({success: true, message: 'Token is valid', token: token});
+    res.json({ success: true, message: 'Token is valid', token: token });
 });
 
-//Category
+// Category
 router.get('/categories', JwtUtil.checkToken, async function (req, res) {
     const categories = await CategoryDAO.selectAll();
     res.json(categories);
@@ -46,17 +47,17 @@ router.get('/categories', JwtUtil.checkToken, async function (req, res) {
 
 router.post('/categories', JwtUtil.checkToken, async function (req, res) {
     const name = req.body.name;
-    const category = {name: name};
+    const category = { name: name };
     const result = await CategoryDAO.insert(category);
     res.json(result);
 });
 
 router.put('/categories/:id', JwtUtil.checkToken, async function (req, res) {
-      const _id = req.params.id;
-      const name = req.body.name;
-      const category = {_id: _id, name: name};
-      const result = await CategoryDAO.update(category);
-      res.json(result);
+    const _id = req.params.id;
+    const name = req.body.name;
+    const category = { _id: _id, name: name };
+    const result = await CategoryDAO.update(category);
+    res.json(result);
 });
 
 router.delete('/categories/:id', JwtUtil.checkToken, async function(req, res) {
@@ -65,18 +66,15 @@ router.delete('/categories/:id', JwtUtil.checkToken, async function(req, res) {
     res.json(result);
 });
 
-//Product
+// Product
 router.get('/products', JwtUtil.checkToken, async function (req, res) {
-    //Get data
     var products = await ProductDAO.selectAll();
-    //Pagination
     const sizePage = 4;
     const noPages = Math.ceil(products.length / sizePage);
     var curPage = 1;
-    if (req.query.page) curPage = parseInt(req.query.page); // /products?page=xxx
-    const offset = (curPage- 1) * sizePage;
+    if (req.query.page) curPage = parseInt(req.query.page);
+    const offset = (curPage - 1) * sizePage;
     products = products.slice(offset, offset + sizePage);
-    //Return
     const result = { products: products, noPages: noPages, curPage: curPage };
     res.json(result);
 });
@@ -86,7 +84,7 @@ router.post('/products', JwtUtil.checkToken, async function (req, res) {
     const price = req.body.price;
     const cid = req.body.category;
     const image = req.body.image;
-    const now = new Date().getTime(); //Milliseconds
+    const now = new Date().getTime();
     const category = await CategoryDAO.selectByID(cid);
     const product = { name: name, price: price, image: image, cdate: now, category: category };
     const result = await ProductDAO.insert(product);
@@ -99,7 +97,7 @@ router.put('/products/:id', JwtUtil.checkToken, async function (req, res) {
     const price = req.body.price;
     const cid = req.body.category;
     const image = req.body.image;
-    const now = new Date().getTime(); //Milliseconds
+    const now = new Date().getTime();
     const category = await CategoryDAO.selectByID(cid);
     const product = { _id: _id, name: name, price: price, image: image, cdate: now, category: category };
     const result = await ProductDAO.update(product);
@@ -112,21 +110,42 @@ router.delete('/products/:id', JwtUtil.checkToken, async function (req, res) {
     res.json(result);
 });
 
-// API lấy danh sách đơn hàng
+// Orders
 router.get("/orders", JwtUtil.checkToken, async (req, res) => {
     try {
-        const orders = await OrderDAO.find()
-            .populate("customer", "name email phone")
-            .populate("items.productId", "name price");
-
-        res.json(orders || []); // Luôn trả về một mảng
+        console.log("Fetching orders for admin");
+        const orders = await OrderDAO.find();
+        console.log("Fetched all orders:", orders);
+        res.json(orders || []);
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error fetching orders:", error.message, error.stack);
         res.status(500).json({ error: "Failed to fetch orders" });
     }
 });
 
-// customer
+router.patch("/orders/:id", JwtUtil.checkToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: "Invalid order ID" });
+        }
+        if (!status || !["Pending", "Approved", "Shipped", "Delivered", "Cancelled"].includes(status)) {
+            return res.status(400).json({ error: "Invalid status" });
+        }
+        console.log(`Updating order ${id} to status: ${status}`);
+        const order = await OrderDAO.updateOrderStatus(id, status);
+        if (!order) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+        res.json({ message: "Order status updated", order });
+    } catch (error) {
+        console.error("Error updating order status:", error.message, error.stack);
+        res.status(500).json({ error: "Failed to update order status" });
+    }
+});
+
+// Customer
 router.get('/customers', JwtUtil.checkToken, async function (req, res) {
     const customers = await CustomerDAO.selectAll();
     res.json(customers);
@@ -143,14 +162,14 @@ router.get('/customers/sendmail/:id', JwtUtil.checkToken, async function (req, r
     const _id = req.params.id;
     const cust = await CustomerDAO.selectByID(_id);
     if (cust) {
-      const send = await EmailUtil.send(cust.email, cust._id, cust.token);
-      if (send) {
-        res.json({ success: true, message: 'Please check email' });
-      } else {
-        res.json({ success: false, message: 'Email failure' });
-      }
+        const send = await EmailUtil.send(cust.email, cust._id, cust.token);
+        if (send) {
+            res.json({ success: true, message: 'Please check email' });
+        } else {
+            res.json({ success: false, message: 'Email failure' });
+        }
     } else {
-      res.json({ success: false, message: 'Not exists customer' });
+        res.json({ success: false, message: 'Not exists customer' });
     }
 });
 

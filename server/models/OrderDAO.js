@@ -1,14 +1,16 @@
-const Models = require("./Models");
+const { Order } = require("./Models");
 const mongoose = require("mongoose");
 
 const OrderDAO = {
     async createOrder(order) {
         try {
-            order._id = new mongoose.Types.ObjectId();
-            const result = await Models.Order.create(order);
-            return result;
+            console.log("Creating order:", JSON.stringify(order, null, 2));
+            const newOrder = new Order(order);
+            const savedOrder = await newOrder.save();
+            console.log("Order created:", JSON.stringify(savedOrder, null, 2));
+            return savedOrder;
         } catch (error) {
-            console.error("❌ Error creating order:", error);
+            console.error("❌ Error creating order:", error.message, error.stack);
             return null;
         }
     },
@@ -16,68 +18,47 @@ const OrderDAO = {
     async getOrdersByCustomer(customerId) {
         try {
             if (!mongoose.Types.ObjectId.isValid(customerId)) {
-                console.error("Invalid customerId:", customerId);
+                console.error("Invalid customerId for getOrdersByCustomer:", customerId);
                 return [];
             }
-            return await Models.Order.find({ "customer._id": customerId })
-                .populate("customer")
-                .populate("items.product")
-                .exec();
-        } catch (error) {
-            console.error("❌ Error fetching orders by customer:", error);
-            return [];
-        }
-    },
-
-    async selectAll() {
-        try {
-            const orders = await Models.Order.find({}).exec();
+            const orders = await Order.find({ "customer._id": customerId })
+                .sort({ cdate: -1 });
+            console.log("Fetched orders for customer:", customerId, "Orders:", JSON.stringify(orders, null, 2));
             return orders;
         } catch (error) {
-            console.error("❌ Error fetching all orders:", error);
+            console.error("❌ Error fetching customer orders:", error.message, error.stack);
             return [];
         }
     },
 
-    async selectByID(_id) {
+    async find() {
         try {
-            if (!mongoose.Types.ObjectId.isValid(_id)) {
-                console.error("Invalid order ID:", _id);
+            const orders = await Order.find()
+                .sort({ cdate: -1 });
+            console.log("Fetched all orders:", JSON.stringify(orders, null, 2));
+            return orders;
+        } catch (error) {
+            console.error("❌ Error fetching all orders:", error.message, error.stack);
+            return [];
+        }
+    },
+
+    async updateOrderStatus(orderId, status) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(orderId)) {
+                console.error("Invalid orderId for updateOrderStatus:", orderId);
                 return null;
             }
-            const order = await Models.Order.findById(_id).exec();
+            const order = await Order.findByIdAndUpdate(
+                orderId,
+                { status },
+                { new: true }
+            );
+            console.log(`Updated order ${orderId} to status: ${status}`, JSON.stringify(order, null, 2));
             return order;
         } catch (error) {
-            console.error("❌ Error fetching order by ID:", error);
+            console.error("❌ Error updating order status:", error.message, error.stack);
             return null;
-        }
-    },
-
-    async update(order) {
-        try {
-            if (!mongoose.Types.ObjectId.isValid(order._id)) {
-                console.error("Invalid order ID for update:", order._id);
-                return null;
-            }
-            const result = await Models.Order.findByIdAndUpdate(order._id, order, { new: true }).exec();
-            return result;
-        } catch (error) {
-            console.error("❌ Error updating order:", error);
-            return null;
-        }
-    },
-
-    async delete(_id) {
-        try {
-            if (!mongoose.Types.ObjectId.isValid(_id)) {
-                console.error("Invalid order ID for delete:", _id);
-                return false;
-            }
-            const result = await Models.Order.findByIdAndDelete(_id).exec();
-            return !!result;
-        } catch (error) {
-            console.error("❌ Error deleting order:", error);
-            return false;
         }
     }
 };

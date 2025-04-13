@@ -2,15 +2,15 @@ import React, { Component } from "react";
 import axios from "axios";
 import MyContext from "../contexts/MyContext";
 
-class Orders extends Component {
+class Order extends Component {
     static contextType = MyContext;
 
     constructor(props) {
         super(props);
         this.state = {
             orders: [],
-            loading: false,
-            message: "",
+            loading: true,
+            error: "",
         };
     }
 
@@ -21,56 +21,75 @@ class Orders extends Component {
     fetchOrders = async () => {
         const { token } = this.context;
         if (!token) {
-            this.setState({ message: "Please login to view orders" });
+            this.setState({ error: "Please login", loading: false });
             return;
         }
-        this.setState({ loading: true, message: "" });
         try {
             const response = await axios.get("/api/customer/orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            this.setState({ orders: response.data || [], loading: false });
+            console.log("Customer orders:", response.data); // Debug
+            this.setState({ 
+                orders: Array.isArray(response.data) ? response.data : [],
+                loading: false,
+                error: ""
+            });
         } catch (error) {
-            const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to fetch orders";
-            console.log("Server error details:", error.response?.data);
-            this.setState({ message: errorMessage, loading: false });
-            console.error("Fetch orders error:", error);
+            console.error("Error fetching orders:", error.response?.data || error.message);
+            this.setState({ 
+                orders: [], 
+                loading: false, 
+                error: "Failed to fetch orders" 
+            });
         }
     };
 
     render() {
-        const { orders, loading, message } = this.state;
+        const { orders, loading, error } = this.state;
+
         return (
             <div className="container mt-4">
                 <h2>My Orders</h2>
-                {message && <div className="alert alert-info">{message}</div>}
+                {error && <div className="alert alert-danger">{error}</div>}
                 {loading ? (
-                    <p>Loading...</p>
+                    <p>Loading orders...</p>
                 ) : orders.length === 0 ? (
                     <p>No orders found.</p>
                 ) : (
-                    <div className="list-group">
-                        {orders.map((order) => (
-                            <div key={order._id} className="list-group-item">
-                                <h5>Order #{order._id}</h5>
-                                <p>Total: ${order.total.toFixed(2)}</p>
-                                <p>Status: {order.status}</p>
-                                <p>Date: {new Date(order.cdate).toLocaleDateString()}</p>
-                                <h6>Items:</h6>
-                                <ul>
-                                    {order.items.map((item, index) => (
-                                        <li key={index}>
-                                            {item.product.name} - Quantity: {item.quantity} - Price: ${item.product.price.toFixed(2)}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
+                    <table className="table table-bordered">
+                        <thead className="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Items</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {orders.map((order) => (
+                                <tr key={order._id}>
+                                    <td>{order._id}</td>
+                                    <td>{new Date(order.cdate).toLocaleDateString()}</td>
+                                    <td>${order.total.toFixed(2)}</td>
+                                    <td>{order.status}</td>
+                                    <td>
+                                        <ul>
+                                            {order.items.map((item, index) => (
+                                                <li key={index}>
+                                                    {item.product?.name || "Unknown"} - {item.quantity} x ${item.product?.price?.toFixed(2) || "0.00"}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
             </div>
         );
     }
 }
 
-export default Orders;
+export default Order;
