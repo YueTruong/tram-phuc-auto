@@ -87,16 +87,25 @@ const verifyCustomer = async (req, res, next) => {
 router.post('/register', async (req, res) => {
     try {
         const { username, password, name, phone, email } = req.body;
+        console.log("Register attempt:", { username, email });
         if (!username || !password || !email) {
+            console.log("Missing required fields:", { username, password, email });
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
+
         const existingCustomer = await CustomerDAO.selectByUsernameOrEmail(username, email);
         if (existingCustomer) {
-            return res.status(400).json({ message: 'Username or email already exists' });
+            console.log("Existing customer found:", { username, email });
+            return res.status(400).json({ success: false, message: 'Username or email already exists' });
         }
+
         const hashedPassword = CryptoUtil.md5(password);
+        console.log("Password hashed");
         const token = JwtUtil.genToken(username);
+        console.log("Token generated:", token);
+
         const newCustomer = {
+            _id: new mongoose.Types.ObjectId(), // Already added
             username,
             password: hashedPassword,
             name,
@@ -105,20 +114,26 @@ router.post('/register', async (req, res) => {
             active: 0,
             token,
         };
+        console.log("New customer data:", JSON.stringify(newCustomer, null, 2));
+
         const result = await CustomerDAO.insert(newCustomer);
-        if (result) {
-            const send = await EmailUtil.send(email, result._id, token);
-            if (send) {
-                return res.json({ success: true, message: 'Please check email!' });
-            } else {
-                return res.json({ success: false, message: 'Send email failed!' });
-            }
+        if (!result) {
+            console.log("Customer insert failed");
+            return res.status(500).json({ success: false, message: 'Failed to create customer' });
+        }
+        console.log("Customer inserted:", JSON.stringify(result, null, 2));
+
+        const send = await EmailUtil.send(email, result._id, token);
+        if (send) {
+            console.log("Email sent to:", email);
+            return res.status(201).json({ success: true, message: 'Please check email!' });
         } else {
-            return res.json({ success: false, message: 'Register failed!' });
+            console.log("Email send failed for:", email);
+            return res.status(500).json({ success: false, message: 'Send email failed!' });
         }
     } catch (error) {
-        console.error("Register error:", error);
-        res.status(500).json({ message: `Failed to register: ${error.message}` });
+        console.error("Register error:", error.message, error.stack);
+        res.status(500).json({ success: false, message: `Failed to register: ${error.message}` });
     }
 });
 
