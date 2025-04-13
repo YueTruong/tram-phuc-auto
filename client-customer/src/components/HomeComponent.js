@@ -58,7 +58,7 @@ class Home extends Component {
             <div className="container mt-4">
                 {/* New Products Section */}
                 <div className="text-center">
-                    <h2 className="mb-4 text-primary">NEW PRODUCTS</h2>
+                    <h2 className="mb-4 text-primary font">NEW PRODUCTS</h2>
                 </div>
                 <div className="row">
                     {newProds.map((item) => (
@@ -80,7 +80,7 @@ class Home extends Component {
                 {hotProds.length > 0 && (
                     <>
                         <div className="text-center">
-                            <h2 className="mt-5 mb-4 text-warning">HOT PRODUCTS</h2>
+                            <h2 className="mt-5 mb-4 text-warning font">HOT PRODUCTS</h2>
                         </div>
                         <div className="row">
                             {hotProds.map((item) => (

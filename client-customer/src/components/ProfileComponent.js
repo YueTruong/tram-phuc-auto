@@ -15,7 +15,6 @@ class Profile extends Component {
     }
 
     componentDidMount() {
-        // Use context customer if available
         if (this.context.customer) {
             this.setState({ customer: this.context.customer });
         } else {
@@ -34,7 +33,7 @@ class Profile extends Component {
             const response = await axios.get("/api/customer/profile", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log("Profile fetch response:", response.data); // Debug
+            console.log("Profile fetch response:", response.data);
             this.setState({ customer: response.data, loading: false });
         } catch (error) {
             console.error("Profile fetch error:", error.response?.data || error.message);
@@ -48,19 +47,45 @@ class Profile extends Component {
     render() {
         const { customer, loading, message } = this.state;
         return (
-            <div className="container mt-4">
-                <h2>Profile</h2>
-                {message && <div className="alert alert-info">{message}</div>}
+            <div className="container mt-5">
+                <h2 className="mb-4 text-center text-primary">My Profile</h2>
+
+                {message && (
+                    <div className="alert alert-warning text-center">{message}</div>
+                )}
+
                 {loading ? (
-                    <p>Loading...</p>
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
                 ) : customer ? (
-                    <div>
-                        <p>Username: {customer.username}</p>
-                        <p>Name: {customer.name}</p>
-                        <p>Email: {customer.email}</p>
+                    <div className="card shadow mx-auto" style={{ maxWidth: "400px" }}>
+                        <div className="card-body">
+                            <h5 className="card-title text-center text-success mb-3">
+                                Welcome, {customer.name || customer.username}!
+                            </h5>
+                            <ul className="list-group list-group-flush mb-3">
+                                <li className="list-group-item">
+                                    <strong>Username:</strong> {customer.username}
+                                </li>
+                                <li className="list-group-item">
+                                    <strong>Name:</strong> {customer.name || "N/A"}
+                                </li>
+                                <li className="list-group-item">
+                                    <strong>Email:</strong> {customer.email}
+                                </li>
+                            </ul>
+                            <div className="text-center">
+                                <button className="btn btn-outline-primary">
+                                    Edit Profile
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 ) : (
-                    <p>No profile data</p>
+                    <p className="text-center text-muted">No profile data available.</p>
                 )}
             </div>
         );

@@ -20,11 +20,11 @@ class Checkout extends Component {
         const totalPrice = mycart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         return (
-            <div className="container mt-4">
+            <div className="checkout-container container mt-4">
                 <h2>Checkout</h2>
                 {message && <div className="alert alert-info">{message}</div>}
                 {mycart.length === 0 ? (
-                    <p>Your cart is empty.</p>
+                    <p className="empty-cart-message">Your cart is empty.</p>
                 ) : (
                     <div>
                         <h4>Order Summary</h4>
@@ -48,9 +48,9 @@ class Checkout extends Component {
                                 ))}
                             </tbody>
                         </table>
-                        <div className="d-flex justify-content-between align-items-center border-top pt-3">
+                        <div className="total-section d-flex justify-content-between align-items-center border-top pt-3">
                             <h5>Total:</h5>
-                            <h5 className="fw-bold text-success">${totalPrice.toFixed(2)}</h5>
+                            <h5 className="fw-bold">${totalPrice.toFixed(2)}</h5>
                         </div>
                         <button
                             className="btn btn-primary w-100 mt-3"

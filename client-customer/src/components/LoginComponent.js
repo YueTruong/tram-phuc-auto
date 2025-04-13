@@ -19,30 +19,50 @@ class Login extends Component {
     render() {
         if (this.context.token === '') {
             return (
-                <div className="container mt-5">
-                    <h2>Login</h2>
-                    {this.state.message && <p className="text-danger">{this.state.message}</p>}
-                    <form>
-                        <input
-                            className="form-control mb-2"
-                            type="text"
-                            name="username"
-                            placeholder="Username"
-                            value={this.state.txtUsername}
-                            onChange={(e) => this.setState({ txtUsername: e.target.value })}
-                            required
-                        />
-                        <input
-                            className="form-control mb-2"
-                            type="password"
-                            name="password"
-                            placeholder="Password"
-                            value={this.state.txtPassword}
-                            onChange={(e) => this.setState({ txtPassword: e.target.value })}
-                            required
-                        />
-                        <button className="btn btn-success" onClick={(e) => this.btnLoginClick(e)}>Login</button>
-                    </form>
+                <div className="container d-flex justify-content-center align-items-center vh-100">
+                    <div className="card p-4 shadow-lg" style={{ width: '100%', maxWidth: '400px', borderRadius: '15px' }}>
+                        <h2 className="text-center text-primary mb-4">Customer Login</h2>
+                        {this.state.message && (
+                            <div className="alert alert-danger text-center p-2" role="alert">
+                                {this.state.message}
+                            </div>
+                        )}
+                        <form>
+                            <div className="mb-3">
+                                <input
+                                    className="form-control form-control-lg"
+                                    type="text"
+                                    name="username"
+                                    placeholder="Username"
+                                    value={this.state.txtUsername}
+                                    onChange={(e) => this.setState({ txtUsername: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="mb-3">
+                                <input
+                                    className="form-control form-control-lg"
+                                    type="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    value={this.state.txtPassword}
+                                    onChange={(e) => this.setState({ txtPassword: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="d-grid mb-3">
+                                <button
+                                    className="btn btn-success btn-lg"
+                                    onClick={(e) => this.btnLoginClick(e)}
+                                >
+                                    Login
+                                </button>
+                            </div>
+                        </form>
+                        <p className="text-center mt-3 text-muted" style={{ fontSize: '0.9rem' }}>
+                            Don't have an account? <a href="/register" className="text-decoration-none text-primary">Register</a>
+                        </p>
+                    </div>
                 </div>
             );
         }

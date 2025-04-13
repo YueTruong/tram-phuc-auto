@@ -54,64 +54,76 @@ class Register extends Component {
     render() {
         const { message, success } = this.state;
         return (
-            <div className="container mt-5">
-                <h2>Register</h2>
-                {message && (
-                    <p className={success ? "text-success" : "text-danger"}>
-                        {message}
-                    </p>
-                )}
-                <form onSubmit={this.handleSubmit}>
-                    <input
-                        className="form-control mb-2"
-                        type="text"
-                        name="username"
-                        placeholder="Username"
-                        value={this.state.username}
-                        onChange={this.handleChange}
-                        required
-                    />
-                    <input
-                        className="form-control mb-2"
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        value={this.state.password}
-                        onChange={this.handleChange}
-                        required
-                    />
-                    <input
-                        className="form-control mb-2"
-                        type="text"
-                        name="name"
-                        placeholder="Full Name"
-                        value={this.state.name}
-                        onChange={this.handleChange}
-                    />
-                    <input
-                        className="form-control mb-2"
-                        type="text"
-                        name="phone"
-                        placeholder="Phone"
-                        value={this.state.phone}
-                        onChange={this.handleChange}
-                    />
-                    <input
-                        className="form-control mb-2"
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={this.state.email}
-                        onChange={this.handleChange}
-                        required
-                    />
-                    <button className="btn btn-primary" type="submit">
-                        Register
-                    </button>
-                </form>
+            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+                <div className="card p-4 shadow" style={{ width: '100%', maxWidth: '400px', borderRadius: '15px' }}>
+                    <h2 className="text-center mb-4">Register</h2>
+                    {message && (
+                        <div className={`alert ${success ? 'alert-success' : 'alert-danger'}`} role="alert">
+                            {message}
+                        </div>
+                    )}
+                    <form onSubmit={this.handleSubmit}>
+                        <div className="mb-3">
+                            <input
+                                className="form-control"
+                                type="text"
+                                name="username"
+                                placeholder="Username"
+                                value={this.state.username}
+                                onChange={this.handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <input
+                                className="form-control"
+                                type="password"
+                                name="password"
+                                placeholder="Password"
+                                value={this.state.password}
+                                onChange={this.handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <input
+                                className="form-control"
+                                type="text"
+                                name="name"
+                                placeholder="Full Name"
+                                value={this.state.name}
+                                onChange={this.handleChange}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <input
+                                className="form-control"
+                                type="text"
+                                name="phone"
+                                placeholder="Phone"
+                                value={this.state.phone}
+                                onChange={this.handleChange}
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <input
+                                className="form-control"
+                                type="email"
+                                name="email"
+                                placeholder="Email"
+                                value={this.state.email}
+                                onChange={this.handleChange}
+                                required
+                            />
+                        </div>
+                        <button className="btn btn-primary w-100" type="submit">
+                            Register
+                        </button>
+                    </form>
+                </div>
             </div>
         );
-    }
+    }    
 }
 
 export default withRouter(Register);
