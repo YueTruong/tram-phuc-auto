@@ -21,7 +21,7 @@ class Inform extends Component {
                                 <span className="text-muted">|</span>
                                 <Link to='/login' className="btn">Login</Link>
                                 <span className="text-muted">|</span>
-                                <Link to='/active' className="btn">Active</Link>
+                                <Link to='/activate' className="btn">Active</Link>
                             </div>
                         ) : (
                             <div style={{ paddingLeft: '12px' }}>
