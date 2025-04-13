@@ -40,7 +40,7 @@ class Product extends Component {
             <div className="container mt-4">
                 <div className="row">
                     <div className="col-md-8">
-                        <h2 className="text-center">PRODUCT LIST</h2>
+                        <h2 className="text-center text-primary mb-4">PRODUCT LIST</h2>
                         <table className="table table-striped table-bordered">
                             <thead className="table-dark">
                                 <tr>

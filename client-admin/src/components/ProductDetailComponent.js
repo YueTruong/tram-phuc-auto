@@ -25,7 +25,7 @@ class ProductDetail extends Component {
         });
         return (
             <div className="float-right">
-                <h2 className="text-center">PRODUCT DETAIL</h2>
+                <h2 className="text-center text-primary mb-4">PRODUCT DETAIL</h2>
                 <form>
                     <div className="mb-3">
                         <label className="form-label">ID</label>

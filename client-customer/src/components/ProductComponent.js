@@ -55,7 +55,7 @@ class Product extends Component {
     render() {
         return (
             <div className="container mt-4">
-                <h2 className="text-center mb-4">LIST PRODUCTS</h2>
+                <h2 className="text-center mb-4 text-primary">LIST PRODUCTS</h2>
                 <div className="row">
                     {this.state.products.length > 0 ? (
                         this.state.products.map((item) => (

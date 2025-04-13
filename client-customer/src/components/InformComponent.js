@@ -7,37 +7,43 @@ class Inform extends Component {
 
     render() {
         const { token, customer, mycart } = this.context;
-        const totalItems = mycart ? mycart.length : 0; // Unique items
+        const totalItems = mycart ? mycart.length : 0;
 
-        console.log("Inform.js customer:", customer); // Debug
+        console.log("Inform.js customer:", customer);
 
         return (
-            <div className="container-fluid bg-light py-0 border-bottom w-100" style={{ marginTop: '56px' }}>
-                <div className="row align-items-center">
-                    <div className="col-md-8 text-start">
-                        {token === '' ? (
-                            <div>
-                                <Link to='/register' className="btn">Register</Link>
-                                <span className="text-muted">|</span>
-                                <Link to='/login' className="btn">Login</Link>
-                                <span className="text-muted">|</span>
-                                <Link to='/activate' className="btn">Active</Link>
-                            </div>
-                        ) : (
-                            <div style={{ paddingLeft: '12px' }}>
-                                <span className="me-3">Hello <b>{customer?.name || 'User'}</b></span>
-                                <span className="text-muted">|</span>
-                                <Link to='/home' className="btn" onClick={() => this.lnkLogoutClick()}>Logout</Link>
-                                <span className="text-muted">|</span>
-                                <Link to='/profile' className="btn">My Profile</Link>
-                                <span className="text-muted">|</span>
-                                <Link to='/cart' className="btn">
-                                    My Cart ({totalItems} item{totalItems !== 1 ? 's' : ''})
-                                </Link>
-                                <span className="text-muted">|</span>
-                                <Link to='/orders' className="btn">My Order</Link>
-                            </div>
-                        )}
+            <div className="customer-inform">
+                <div className="container-fluid">
+                    <div className="row">
+                        <div className="col-md-8 d-flex align-items-center">
+                            {token === '' ? (
+                                <div className="d-flex align-items-center">
+                                    <Link to='/register' className="btn btn-link">Register</Link>
+                                    <span className="separator">|</span>
+                                    <Link to='/login' className="btn btn-link">Login</Link>
+                                    <span className="separator">|</span>
+                                    <Link to='/activate' className="btn btn-link">Activate</Link>
+                                </div>
+                            ) : (
+                                <div className="d-flex align-items-center flex-wrap">
+                                    <span className="greeting me-3">
+                                        Hello <b>{customer?.name || 'User'}</b>
+                                    </span>
+                                    <span className="separator">|</span>
+                                    <Link to='/home' className="btn btn-link" onClick={() => this.lnkLogoutClick()}>
+                                        Logout
+                                    </Link>
+                                    <span className="separator">|</span>
+                                    <Link to='/profile' className="btn btn-link">My Profile</Link>
+                                    <span className="separator">|</span>
+                                    <Link to='/orders' className="btn btn-link">My Orders</Link>
+                                    <span className="separator">|</span>
+                                    <Link to='/cart' className="btn btn-primary">
+                                        My Cart ({totalItems} item{totalItems !== 1 ? 's' : ''})
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

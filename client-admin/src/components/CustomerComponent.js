@@ -54,7 +54,7 @@ class Customer extends Component {
 
     return (
       <div className="customer-management">
-        <h2>Customer List</h2>
+        <h2 className="text-primary mb-4">Customer List</h2>
         <div className="table-responsive">
           <table className="table table-hover customer-table">
             <thead>

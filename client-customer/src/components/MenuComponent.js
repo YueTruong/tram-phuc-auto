@@ -43,7 +43,7 @@ class Menu extends Component {
                             ))}
                         </ul>
 
-                        <form className="d-flex" onSubmit={this.btnSearchClick}>
+                        <form className="d-flex search-form" onSubmit={this.btnSearchClick}>
                             <input
                                 className="form-control me-2"
                                 type="search"
@@ -75,7 +75,7 @@ class Menu extends Component {
         const keyword = this.state.txtKeyword.trim();
         if (keyword) {
             this.props.navigate(`/product/search/${keyword}`);
-            this.setState({ txtKeyword: "" }); // Clear input
+            this.setState({ txtKeyword: "" });
         }
     };
 

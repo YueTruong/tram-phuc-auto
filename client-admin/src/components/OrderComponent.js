@@ -77,7 +77,7 @@ class Order extends Component {
 
         return (
             <div className="order-container container mt-4">
-                <h2>Order Management</h2>
+                <h2 className="text-primary mb-4">Order Management</h2>
                 {error && <div className="alert alert-danger">{error}</div>}
                 {loading ? (
                     <p>Loading orders...</p>
