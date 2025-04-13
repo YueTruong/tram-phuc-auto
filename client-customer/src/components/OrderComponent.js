@@ -20,15 +20,19 @@ class Orders extends Component {
 
     fetchOrders = async () => {
         const { token } = this.context;
-        if (!token) return;
-        this.setState({ loading: true });
+        if (!token) {
+            this.setState({ message: "Please login to view orders" });
+            return;
+        }
+        this.setState({ loading: true, message: "" });
         try {
             const response = await axios.get("/api/customer/orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            this.setState({ orders: response.data, loading: false });
+            this.setState({ orders: response.data || [], loading: false });
         } catch (error) {
-            this.setState({ message: "Failed to fetch orders", loading: false });
+            const errorMessage = error.response?.data?.error || "Failed to fetch orders";
+            this.setState({ message: errorMessage, loading: false });
             console.error("Fetch orders error:", error);
         }
     };
@@ -44,13 +48,24 @@ class Orders extends Component {
                 ) : orders.length === 0 ? (
                     <p>No orders found.</p>
                 ) : (
-                    <ul>
+                    <div className="list-group">
                         {orders.map((order) => (
-                            <li key={order._id}>
-                                Order #{order._id} - Total: ${order.total} - Status: {order.status}
-                            </li>
+                            <div key={order._id} className="list-group-item">
+                                <h5>Order #{order._id}</h5>
+                                <p>Total: ${order.total.toFixed(2)}</p>
+                                <p>Status: {order.status}</p>
+                                <p>Date: {new Date(order.cdate).toLocaleDateString()}</p>
+                                <h6>Items:</h6>
+                                <ul>
+                                    {order.items.map((item, index) => (
+                                        <li key={index}>
+                                            {item.product.name} - Quantity: {item.quantity} - Price: ${item.product.price.toFixed(2)}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 )}
             </div>
         );

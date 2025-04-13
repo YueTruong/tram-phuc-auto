@@ -209,16 +209,21 @@ const verifyCustomer = async (req, res, next) => {
             return res.status(401).json({ message: "Unauthorized" });
         }
         const decoded = JwtUtil.verifyToken(token);
+        console.log("Decoded token:", decoded); // Debug
+        if (!decoded.username) {
+            return res.status(401).json({ message: "Invalid token payload" });
+        }
         const customer = await Customer.findOne({ username: decoded.username });
         if (!customer) {
             console.log("Customer not found for username:", decoded.username);
             return res.status(404).json({ message: "Customer not found" });
         }
+        console.log("Customer found:", customer._id); // Debug
         req.customer = customer;
         next();
     } catch (error) {
         console.error("Verify error:", error);
-        res.status(401).json({ message: "Invalid token" });
+        res.status(401).json({ message: `Invalid token: ${error.message}` });
     }
 };
 
@@ -310,6 +315,29 @@ router.post("/orders", verifyCustomer, async (req, res) => {
     } catch (error) {
         console.error("Order creation failed:", error);
         res.status(500).json({ error: `Failed to place order: ${error.message}` });
+    }
+});
+
+router.get("/orders", verifyCustomer, async (req, res) => {
+    try {
+        const orders = await OrderDAO.getOrdersByCustomer(req.customer._id);
+        res.json(orders);
+    } catch (error) {
+        console.error("Fetch orders failed:", error);
+        res.status(500).json({ message: `Failed to fetch orders: ${error.message}` });
+    }
+});
+
+router.get("/profile/:id", verifyCustomer, async (req, res) => {
+    try {
+        const customer = await Customer.findById(req.params.id);
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        res.json(customer);
+    } catch (error) {
+        console.error("Fetch customer failed:", error);
+        res.status(500).json({ message: `Failed to fetch customer: ${error.message}` });
     }
 });
 

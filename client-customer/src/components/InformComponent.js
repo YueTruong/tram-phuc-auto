@@ -33,6 +33,7 @@ class Inform extends Component {
                                     My Cart ({totalItems} item{totalItems !== 1 ? 's' : ''})
                                 </Link>
                                 <span className="text-muted">|</span>
+                                <Link to='/orders' className="btn">My Order</Link>
                             </div>
                         )}
                     </div>
