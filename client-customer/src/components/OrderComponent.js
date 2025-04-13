@@ -31,7 +31,8 @@ class Orders extends Component {
             });
             this.setState({ orders: response.data || [], loading: false });
         } catch (error) {
-            const errorMessage = error.response?.data?.error || "Failed to fetch orders";
+            const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to fetch orders";
+            console.log("Server error details:", error.response?.data);
             this.setState({ message: errorMessage, loading: false });
             console.error("Fetch orders error:", error);
         }

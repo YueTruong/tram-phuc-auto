@@ -1,10 +1,9 @@
-require("../utils/MongooseUtil");
 const Models = require("./Models");
+const mongoose = require("mongoose");
 
 const OrderDAO = {
     async createOrder(order) {
         try {
-            const mongoose = require("mongoose");
             order._id = new mongoose.Types.ObjectId();
             const result = await Models.Order.create(order);
             return result;
@@ -16,6 +15,10 @@ const OrderDAO = {
 
     async getOrdersByCustomer(customerId) {
         try {
+            if (!mongoose.Types.ObjectId.isValid(customerId)) {
+                console.error("Invalid customerId:", customerId);
+                return [];
+            }
             return await Models.Order.find({ "customer._id": customerId })
                 .populate("customer")
                 .populate("items.product")
@@ -26,30 +29,57 @@ const OrderDAO = {
         }
     },
 
-    async getAllOrders() {
+    async selectAll() {
         try {
-            return await Models.Order.find()
-                .populate("customer")
-                .populate("items.product")
-                .exec();
+            const orders = await Models.Order.find({}).exec();
+            return orders;
         } catch (error) {
             console.error("❌ Error fetching all orders:", error);
             return [];
         }
     },
 
-    async updateOrderStatus(orderId, status) {
+    async selectByID(_id) {
         try {
-            return await Models.Order.findByIdAndUpdate(
-                orderId,
-                { status },
-                { new: true }
-            );
+            if (!mongoose.Types.ObjectId.isValid(_id)) {
+                console.error("Invalid order ID:", _id);
+                return null;
+            }
+            const order = await Models.Order.findById(_id).exec();
+            return order;
         } catch (error) {
-            console.error("❌ Error updating order status:", error);
+            console.error("❌ Error fetching order by ID:", error);
             return null;
         }
     },
+
+    async update(order) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(order._id)) {
+                console.error("Invalid order ID for update:", order._id);
+                return null;
+            }
+            const result = await Models.Order.findByIdAndUpdate(order._id, order, { new: true }).exec();
+            return result;
+        } catch (error) {
+            console.error("❌ Error updating order:", error);
+            return null;
+        }
+    },
+
+    async delete(_id) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(_id)) {
+                console.error("Invalid order ID for delete:", _id);
+                return false;
+            }
+            const result = await Models.Order.findByIdAndDelete(_id).exec();
+            return !!result;
+        } catch (error) {
+            console.error("❌ Error deleting order:", error);
+            return false;
+        }
+    }
 };
 
 module.exports = OrderDAO;

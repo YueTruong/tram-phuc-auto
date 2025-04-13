@@ -1,52 +1,89 @@
-require('../utils/MongooseUtil');
-const Models = require('./Models');
+const Models = require("./Models");
+const mongoose = require("mongoose");
 
 const CustomerDAO = {
-  async selectByUsernameOrEmail(username, email) {
-    const query = { $or: [{ username: username }, { email: email }] };
-    const customer = await Models.Customer.findOne(query);
-    return customer;
-  },
+    async selectAll() {
+        const customers = await Models.Customer.find({}).exec();
+        return customers;
+    },
 
-  async insert(customer) {
-    const mongoose = require('mongoose');
-    customer._id = new mongoose.Types.ObjectId();
-    const result = await Models.Customer.create(customer);
-    return result;
-  },
+    async selectByID(_id) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(_id)) {
+                console.error("Invalid customer ID:", _id);
+                return null;
+            }
+            const customer = await Models.Customer.findById(_id).exec();
+            return customer;
+        } catch (error) {
+            console.error("❌ Error fetching customer by ID:", error);
+            return null;
+        }
+    },
 
-  async active(_id, token, active) {
-    const query = { _id: _id, token: token };
-    const newvalues = { active: active };
-    const result = await Models.Customer.findOneAndUpdate(query, newvalues, { new: true });
-    return result;
-  },
+    async insert(customer) {
+        const newCustomer = new Models.Customer(customer);
+        const result = await newCustomer.save();
+        return result;
+    },
 
-  async selectByUsernameAndPassword(username, password) {
-    try {
-      const query = { username, password };
-      return await Models.Customer.findOne(query);
-    } catch (error) {
-      console.error("❌ Error fetching customer:", error);
-      return null;
+    async update(customer) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(customer._id)) {
+                console.error("Invalid customer ID for update:", customer._id);
+                return null;
+            }
+            const result = await Models.Customer.findByIdAndUpdate(customer._id, customer, { new: true });
+            return result;
+        } catch (error) {
+            console.error("❌ Error updating customer:", error);
+            return null;
+        }
+    },
+
+    async delete(_id) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(_id)) {
+                console.error("Invalid customer ID for delete:", _id);
+                return false;
+            }
+            const result = await Models.Customer.findByIdAndDelete(_id);
+            return result ? true : false;
+        } catch (error) {
+            console.error("❌ Error deleting customer:", error);
+            return false;
+        }
+    },
+
+    async selectByUsernameOrEmail(username, email) {
+        const customer = await Models.Customer.findOne({
+            $or: [{ username: username }, { email: email }],
+        });
+        return customer;
+    },
+
+    async selectByUsernameAndPassword(username, password) {
+        const customer = await Models.Customer.findOne({ username: username, password: password });
+        return customer;
+    },
+
+    async active(_id, token, active) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(_id)) {
+                console.error("Invalid customer ID for activation:", _id);
+                return null;
+            }
+            const customer = await Models.Customer.findOneAndUpdate(
+                { _id: _id, token: token },
+                { active: active },
+                { new: true }
+            );
+            return customer;
+        } catch (error) {
+            console.error("❌ Error activating customer:", error);
+            return null;
+        }
     }
-  },
-
-  async update(customer) {
-    const newvalues = { username: customer.username, password: customer.password, name: customer.name, email: customer.email };
-    const result = await Models.Customer.findByIdAndUpdate(customer._id, newvalues, { new: true });
-    return result;
-  },
-
-  async selectAll() {
-    const query = {};
-    const customers = await Models.Customer.find(query).exec();
-    return customers;
-  },
-
-  async selectByID(_id) {
-    const customer = await Models.Customer.findById(_id).exec();
-    return customer;
-  },
 };
+
 module.exports = CustomerDAO;

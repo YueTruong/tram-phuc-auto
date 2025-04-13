@@ -11,7 +11,7 @@ import Login from "./LoginComponent";
 import Activate from "./ActivateComponent";
 import Cart from "./CartComponent";
 import Checkout from "./CheckoutComponent";
-import MyProfile from "./MyProfileComponent";
+import Profile from "./ProfileComponent";
 import Orders from "./OrderComponent";
 
 class Main extends Component {
@@ -30,7 +30,7 @@ class Main extends Component {
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/activate" element={<Activate />} />
-                        <Route path="/myprofile" element={<MyProfile />} />
+                        <Route path="/profile" element={<Profile />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/orders" element={<Orders />} />

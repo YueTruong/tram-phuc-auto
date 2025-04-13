@@ -2,26 +2,26 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-//Utils
+// Utils
 const CryptoUtil = require('../utils/CryptoUtil');
 const JwtUtil = require('../utils/JwtUtil');
 const EmailUtil = require('../utils/EmailUtil');
 
-//DAOs
+// DAOs
 const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
 const CustomerDAO = require('../models/CustomerDAO');
 const OrderDAO = require("../models/OrderDAO");
 const CartDAO = require("../models/CartDAO");
-const {Customer} = require("../models/Models");
+const { Customer } = require("../models/Models");
 
-//Category
+// Category
 router.get('/categories', async function (req, res) {
     const categories = await CategoryDAO.selectAll();
     res.json(categories);
 });
 
-//Product
+// Product
 router.get('/products/new', async function (req, res) {
     const products = await ProductDAO.selectTopNew(3);
     res.json(products);
@@ -55,31 +55,23 @@ router.post('/register', async (req, res) => {
     try {
         const { username, password, name, phone, email } = req.body;
         if (!username || !password || !email) {
-            return res.status(400).json({success: false, message: 'Missing required fields' });
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
-
-        // Check if username or email already exists
         const existingCustomer = await CustomerDAO.selectByUsernameOrEmail(username, email);
         if (existingCustomer) {
             return res.status(400).json({ message: 'Username or email already exists' });
         }
-
-        // Hash password and create new customer
         const hashedPassword = CryptoUtil.md5(password);
-
-        // Generate token
-        const token = JwtUtil.genToken(username, password);
-
+        const token = JwtUtil.genToken(username);
         const newCustomer = {
             username,
             password: hashedPassword,
             name,
             phone,
             email,
-            active: 0, // Default inactive
+            active: 0,
             token,
         };
-
         const result = await CustomerDAO.insert(newCustomer);
         if (result) {
             const send = await EmailUtil.send(email, result._id, token);
@@ -92,7 +84,8 @@ router.post('/register', async (req, res) => {
             return res.json({ success: false, message: 'Register failed!' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Register error:", error);
+        res.status(500).json({ message: `Failed to register: ${error.message}` });
     }
 });
 
@@ -112,13 +105,13 @@ router.post('/login', async (req, res) => {
         res.json({ success: true, message: 'Authentication successful', token });
     } catch (error) {
         console.error("❌ Login error:", error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(500).json({ success: false, message: `Internal server error: ${error.message}` });
     }
 });
 
 router.get('/token', JwtUtil.checkToken, function (req, res) {
     const token = req.headers['x-access-token'] || req.headers['authorization'];
-    res.json({success: true, message: 'Token is valid', token: token});
+    res.json({ success: true, message: 'Token is valid', token: token });
 });
 
 // Activate account
@@ -126,14 +119,13 @@ router.post('/activate', async (req, res) => {
     try {
         const { _id, token } = req.body;
         const result = await CustomerDAO.active(_id, token, 1);
-        
         if (!result) {
             return res.status(400).json({ message: 'Invalid activation details' });
         }
-
         res.status(200).json({ message: 'Account activated successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Activate error:", error);
+        res.status(500).json({ message: `Failed to activate: ${error.message}` });
     }
 });
 
@@ -143,10 +135,11 @@ router.get("/me", JwtUtil.checkToken, async (req, res) => {
         if (!customer) {
             return res.status(404).json({ message: "Customer not found" });
         }
-        console.log("Server response:", customer); // Kiểm tra dữ liệu trên server
+        console.log("Server response:", customer);
         res.json(customer);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("Fetch me failed:", error);
+        res.status(500).json({ message: `Server error: ${error.message}` });
     }
 });
 
@@ -156,44 +149,8 @@ router.get('/', async (req, res) => {
         const customers = await CustomerDAO.selectAll();
         res.status(200).json(customers);
     } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Get customer by ID
-router.get('/:id', async (req, res) => {
-    try {
-        const customer = await CustomerDAO.selectByID(req.params.id);
-        if (!customer) {
-            return res.status(404).json({ message: 'Customer not found' });
-        }
-        res.status(200).json(customer);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Update customer
-router.put('/:id', async (req, res) => {
-    try {
-        const { username, password, name, phone, email } = req.body;
-        const updatedCustomer = {
-            _id: req.params.id,
-            username,
-            password: CryptoUtil.md5(password),
-            name,
-            phone,
-            email
-        };
-
-        const result = await CustomerDAO.update(updatedCustomer);
-        if (!result) {
-            return res.status(400).json({ message: 'Update failed' });
-        }
-
-        res.status(200).json({ message: 'Customer updated successfully', customer: result });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Fetch all customers failed:", error);
+        res.status(500).json({ message: `Failed to fetch customers: ${error.message}` });
     }
 });
 
@@ -209,8 +166,8 @@ const verifyCustomer = async (req, res, next) => {
             return res.status(401).json({ message: "Unauthorized" });
         }
         const decoded = JwtUtil.verifyToken(token);
-        console.log("Decoded token:", decoded); // Debug
-        if (!decoded.username) {
+        console.log("Decoded token:", decoded);
+        if (!decoded.username || typeof decoded.username !== 'string') {
             return res.status(401).json({ message: "Invalid token payload" });
         }
         const customer = await Customer.findOne({ username: decoded.username });
@@ -218,7 +175,10 @@ const verifyCustomer = async (req, res, next) => {
             console.log("Customer not found for username:", decoded.username);
             return res.status(404).json({ message: "Customer not found" });
         }
-        console.log("Customer found:", customer._id); // Debug
+        console.log("Customer found:", customer._id);
+        if (!mongoose.Types.ObjectId.isValid(customer._id)) {
+            return res.status(500).json({ message: "Invalid customer ID" });
+        }
         req.customer = customer;
         next();
     } catch (error) {
@@ -230,10 +190,12 @@ const verifyCustomer = async (req, res, next) => {
 // Get customer cart
 router.get("/cart", verifyCustomer, async (req, res) => {
     try {
+        console.log("Fetching cart for customerId:", req.customer._id);
         const cart = await CartDAO.getCart(req.customer._id);
         res.json(cart || { items: [] });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching cart" });
+        console.error("Fetch cart failed:", error);
+        res.status(500).json({ message: `Failed to fetch cart: ${error.message}` });
     }
 });
 
@@ -244,7 +206,8 @@ router.post("/cart", verifyCustomer, async (req, res) => {
         const updatedCart = await CartDAO.updateCart(req.customer._id, items);
         res.json(updatedCart);
     } catch (error) {
-        res.status(500).json({ message: "Error updating cart" });
+        console.error("Update cart failed:", error);
+        res.status(500).json({ message: `Failed to update cart: ${error.message}` });
     }
 });
 
@@ -254,7 +217,8 @@ router.delete("/cart", verifyCustomer, async (req, res) => {
         await CartDAO.clearCart(req.customer._id);
         res.json({ message: "Cart cleared" });
     } catch (error) {
-        res.status(500).json({ message: "Error clearing cart" });
+        console.error("Clear cart failed:", error);
+        res.status(500).json({ message: `Failed to clear cart: ${error.message}` });
     }
 });
 
@@ -265,20 +229,21 @@ router.post("/cart/sync", verifyCustomer, async (req, res) => {
         const syncedCart = await CartDAO.syncCart(req.customer._id, items);
         res.json(syncedCart);
     } catch (error) {
-        res.status(500).json({ message: "Error syncing cart" });
+        console.error("Sync cart failed:", error);
+        res.status(500).json({ message: `Failed to sync cart: ${error.message}` });
     }
 });
 
-// Update orders route
+// Create order
 router.post("/orders", verifyCustomer, async (req, res) => {
     try {
         const { items, total } = req.body;
         if (!items || !Array.isArray(items) || items.length === 0) {
-            return res.status(400).json({ error: "Invalid or empty items" });
+            return res.status(400).json({ message: "Invalid or empty items" });
         }
         for (const item of items) {
             if (!mongoose.Types.ObjectId.isValid(item.productId)) {
-                return res.status(400).json({ error: `Invalid productId: ${item.productId}` });
+                return res.status(400).json({ message: `Invalid productId: ${item.productId}` });
             }
         }
         const newOrder = {
@@ -309,17 +274,19 @@ router.post("/orders", verifyCustomer, async (req, res) => {
         };
         const result = await OrderDAO.createOrder(newOrder);
         if (!result) {
-            return res.status(500).json({ error: "Failed to create order" });
+            return res.status(500).json({ message: "Failed to create order" });
         }
         res.status(201).json({ message: "Order placed successfully", order: result });
     } catch (error) {
         console.error("Order creation failed:", error);
-        res.status(500).json({ error: `Failed to place order: ${error.message}` });
+        res.status(500).json({ message: `Failed to place order: ${error.message}` });
     }
 });
 
+// Get customer orders
 router.get("/orders", verifyCustomer, async (req, res) => {
     try {
+        console.log("Fetching orders for customerId:", req.customer._id);
         const orders = await OrderDAO.getOrdersByCustomer(req.customer._id);
         res.json(orders);
     } catch (error) {
@@ -328,9 +295,54 @@ router.get("/orders", verifyCustomer, async (req, res) => {
     }
 });
 
+// Get customer by ID (moved below specific routes)
+router.get("/customer/:id", async (req, res) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "Invalid customer ID" });
+        }
+        const customer = await CustomerDAO.selectByID(req.params.id);
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        res.status(200).json(customer);
+    } catch (error) {
+        console.error("Fetch customer failed:", error);
+        res.status(500).json({ message: `Failed to fetch customer: ${error.message}` });
+    }
+});
+
+// Update customer
+router.put("/customer/:id", async (req, res) => {
+    try {
+        const { username, password, name, phone, email } = req.body;
+        const updatedCustomer = {
+            _id: req.params.id,
+            username,
+            password: password ? CryptoUtil.md5(password) : undefined,
+            name,
+            phone,
+            email
+        };
+        const result = await CustomerDAO.update(updatedCustomer);
+        if (!result) {
+            return res.status(400).json({ message: "Update failed" });
+        }
+        res.status(200).json({ message: "Customer updated successfully", customer: result });
+    } catch (error) {
+        console.error("Update customer failed:", error);
+        res.status(500).json({ message: `Failed to update customer: ${error.message}` });
+    }
+});
+
+// Profile route
 router.get("/profile/:id", verifyCustomer, async (req, res) => {
     try {
-        const customer = await Customer.findById(req.params.id);
+        console.log("Fetching profile for id:", req.params.id);
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "Invalid customer ID" });
+        }
+        const customer = await CustomerDAO.selectByID(req.params.id);
         if (!customer) {
             return res.status(404).json({ message: "Customer not found" });
         }

@@ -27,7 +27,7 @@ class Inform extends Component {
                                 <span className="text-muted">|</span>
                                 <Link to='/home' className="btn" onClick={() => this.lnkLogoutClick()}>Logout</Link>
                                 <span className="text-muted">|</span>
-                                <Link to='/myprofile' className="btn">My Profile</Link>
+                                <Link to='/profile' className="btn">My Profile</Link>
                                 <span className="text-muted">|</span>
                                 <Link to='/cart' className="btn">
                                     My Cart ({totalItems} item{totalItems !== 1 ? 's' : ''})
