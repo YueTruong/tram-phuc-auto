@@ -14,9 +14,9 @@ class Menu extends Component {
 
     render() {
         return (
-            <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top w-100">
+            <nav className="navbar navbar-expand-lg customer-menu fixed-top">
                 <div className="container-fluid">
-                    <Link className="navbar-brand fw-bold" to="/">TPV Auto</Link>
+                    <Link className="navbar-brand" to="/">TPV Auto</Link>
                     <button
                         className="navbar-toggler"
                         type="button"
@@ -43,12 +43,11 @@ class Menu extends Component {
                             ))}
                         </ul>
 
-                        {/* Search Form */}
                         <form className="d-flex" onSubmit={this.btnSearchClick}>
                             <input
                                 className="form-control me-2"
                                 type="search"
-                                placeholder="Enter keyword"
+                                placeholder="Search products"
                                 aria-label="Search"
                                 value={this.state.txtKeyword}
                                 onChange={this.handleInputChange}
@@ -71,21 +70,23 @@ class Menu extends Component {
         this.setState({ txtKeyword: e.target.value });
     };
 
-    //Event-handlers
     btnSearchClick = (e) => {
         e.preventDefault();
-        if (this.state.txtKeyword.trim()) {
-            this.props.navigate(`/product/search/${this.state.txtKeyword}`);
+        const keyword = this.state.txtKeyword.trim();
+        if (keyword) {
+            this.props.navigate(`/product/search/${keyword}`);
+            this.setState({ txtKeyword: "" }); // Clear input
         }
     };
 
-    //APIs
     apiGetCategories = async () => {
         try {
             const res = await axios.get("/api/customer/categories");
-            this.setState({ categories: res.data });
+            console.log("Fetched categories:", res.data);
+            this.setState({ categories: Array.isArray(res.data) ? res.data : [] });
         } catch (error) {
-            console.error("Error fetching categories:", error);
+            console.error("Error fetching categories:", error.response?.data || error.message);
+            this.setState({ categories: [] });
         }
     };
 }

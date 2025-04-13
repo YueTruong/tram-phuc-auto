@@ -13,6 +13,7 @@ import Cart from "./CartComponent";
 import Checkout from "./CheckoutComponent";
 import Profile from "./ProfileComponent";
 import Orders from "./OrderComponent";
+import Footer from "./FooterComponent";
 
 class Main extends Component {
     static contextType = MyContext; // using this.context to access global state
@@ -35,6 +36,7 @@ class Main extends Component {
                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/orders" element={<Orders />} />
                     </Routes>
+                    <Footer />
                 </div>
             );
     }

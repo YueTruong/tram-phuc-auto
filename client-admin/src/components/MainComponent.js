@@ -7,6 +7,7 @@ import Category from './CategoryComponent';
 import Product from './ProductComponent';
 import Order from './OrderComponent';
 import Customer from './CustomerComponent';
+import Footer from './FooterComponent';
 
 class Main extends Component {
     static contextType = MyContext; // using this.context to access global state
@@ -23,6 +24,7 @@ class Main extends Component {
                         <Route path="/admin/order" element={<Order />} />
                         <Route path="/admin/customer" element={<Customer />} />
                     </Routes>
+                    <Footer />
                 </div>
             );
         }

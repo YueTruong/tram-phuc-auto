@@ -107,3 +107,65 @@ tr:not(:first-child):hover.datatable {
   background-color: #dcfcfc;
   cursor: pointer;
 }
+
+/* MenuComponent.css */
+.custom-navbar {
+  background-color: #212529;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.custom-navbar .nav-link {
+  color: #ffffff;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.custom-navbar .nav-link:hover {
+  color: #ffc107;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.custom-navbar .navbar-brand {
+  color: #ffffff;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.custom-navbar .navbar-brand:hover {
+  color: #ffc107;
+}
+
+.custom-navbar .navbar-text {
+  color: #ffffff;
+}
+
+.custom-navbar .navbar-text b {
+  color: #ffc107;
+}
+
+.custom-navbar .text-danger {
+  color: #dc3545 !important;
+}
+
+/* FooterComponent.css */
+.admin-footer {
+  background-color: #212529;
+  color: #ffffff;
+}
+
+.admin-footer a:hover {
+  color: #ffc107;
+  text-decoration: underline;
+}
+
+.admin-footer h5 {
+  font-weight: bold;
+}
+
+.admin-footer p {
+  margin-bottom: 0;
+}
+
+.admin-footer .border-top {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
