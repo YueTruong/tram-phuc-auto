@@ -27,7 +27,7 @@ class ProductDetail extends Component {
 
         return (
             <div className="container mt-4">
-                <h2 className="text-center mb-4">PRODUCT DETAILS</h2>
+                <h2 className="text-center text-primary mb-4">PRODUCT DETAILS</h2>
                 <div className="row">
                     <div className="col-md-6 text-center">
                         <img
