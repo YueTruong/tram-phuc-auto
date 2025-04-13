@@ -15,7 +15,12 @@ class Profile extends Component {
     }
 
     componentDidMount() {
-        this.fetchProfile();
+        // Use context customer if available
+        if (this.context.customer) {
+            this.setState({ customer: this.context.customer });
+        } else {
+            this.fetchProfile();
+        }
     }
 
     fetchProfile = async () => {
@@ -26,12 +31,17 @@ class Profile extends Component {
         }
         this.setState({ loading: true });
         try {
-            const response = await axios.get(`/api/customer/profile/${this.context.customerId}`, {
+            const response = await axios.get("/api/customer/profile", {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            console.log("Profile fetch response:", response.data); // Debug
             this.setState({ customer: response.data, loading: false });
         } catch (error) {
-            this.setState({ message: error.response?.data?.message || "Failed to fetch profile", loading: false });
+            console.error("Profile fetch error:", error.response?.data || error.message);
+            this.setState({ 
+                message: error.response?.data?.message || "Failed to fetch profile", 
+                loading: false 
+            });
         }
     };
 
