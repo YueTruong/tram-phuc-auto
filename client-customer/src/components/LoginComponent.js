@@ -67,7 +67,7 @@ class Login extends Component {
             if (result.success === true) {
                 this.context.setToken(result.token);
                 this.context.setUsername(account.username);
-                this.props.navigate('/home'); // ✅ This will now work
+                this.props.navigate('/home');
             } else {
                 alert(result.message);
             }

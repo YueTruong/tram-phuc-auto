@@ -1,17 +1,25 @@
-//CLI: npm install jsonwebtoken --save
 const jwt = require('jsonwebtoken');
 const MyConstants = require('./MyConstants');
+
 const JwtUtil = {
-    genToken(username, password) {
+    genToken(username) {
         const token = jwt.sign(
-            {username: username, password: password},
+            { username },
             MyConstants.JWT_SECRET,
-            {expiresIn: MyConstants.JWT_EXPIRES}
+            { expiresIn: MyConstants.JWT_EXPIRES }
         );
         return token;
     },
+
+    verifyToken(token) {
+        return jwt.verify(token, MyConstants.JWT_SECRET);
+    },
+    
     checkToken(req, res, next) {
-        const token = req.headers['x-access-token'] || req.headers['authorization'];
+        let token = req.headers['x-access-token'] || req.headers['authorization'];
+        if (token && token.startsWith('Bearer ')) {
+            token = token.slice(7);
+        }
         if (token) {
             jwt.verify(token, MyConstants.JWT_SECRET, (err, decoded) => {
                 if (err) {
@@ -32,4 +40,5 @@ const JwtUtil = {
         }
     }
 };
+
 module.exports = JwtUtil;

@@ -33,7 +33,6 @@ class MyProvider extends Component {
         this.setState({ token: value }, async () => {
             localStorage.setItem("token", value);
             if (value) {
-                // Sync localStorage cart on sign-in
                 await this.syncCartWithBackend(this.state.mycart);
                 await this.fetchCart();
             } else {
@@ -59,7 +58,7 @@ class MyProvider extends Component {
             });
             if (res.data && res.data.items) {
                 const cartItems = res.data.items.map(item => ({
-                    _id: item.product._id,
+                    _id: item.product._id.toString(), // Ensure string
                     name: item.product.name,
                     price: item.product.price,
                     image: item.product.image,
@@ -84,7 +83,7 @@ class MyProvider extends Component {
                 if (existingItem) {
                     existingItem.quantity += quantity;
                 } else {
-                    updatedCart.push({ ...product, quantity });
+                    updatedCart.push({ ...product, quantity, _id: product._id.toString() });
                 }
                 if (!prevState.token) {
                     localStorage.setItem("cart", JSON.stringify(updatedCart));

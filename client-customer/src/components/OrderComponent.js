@@ -1,14 +1,16 @@
-import axios from "axios";
 import React, { Component } from "react";
-import withRouter from "../utils/withRouter";
+import axios from "axios";
+import MyContext from "../contexts/MyContext";
 
-class Order extends Component {
+class Orders extends Component {
+    static contextType = MyContext;
+
     constructor(props) {
         super(props);
         this.state = {
             orders: [],
+            loading: false,
             message: "",
-            filterStatus: "all",
         };
     }
 
@@ -17,74 +19,35 @@ class Order extends Component {
     }
 
     fetchOrders = async () => {
+        const { token } = this.context;
+        if (!token) return;
+        this.setState({ loading: true });
         try {
-            const token = localStorage.getItem("token");
-            const res = await axios.get("/api/customer/orders", {
+            const response = await axios.get("/api/customer/orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            this.setState({ orders: res.data });
+            this.setState({ orders: response.data, loading: false });
         } catch (error) {
-            this.setState({ message: error.response?.data?.message || "Failed to fetch orders" });
+            this.setState({ message: "Failed to fetch orders", loading: false });
+            console.error("Fetch orders error:", error);
         }
-    };
-
-    cancelOrder = async (orderId) => {
-        try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`/api/customer/orders/${orderId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            this.fetchOrders();
-        } catch (error) {
-            this.setState({ message: error.response?.data?.message || "Failed to cancel order" });
-        }
-    };
-
-    handleFilterChange = (e) => {
-        this.setState({ filterStatus: e.target.value });
     };
 
     render() {
-        const filteredOrders = this.state.filterStatus === "all"
-            ? this.state.orders
-            : this.state.orders.filter(order => order.status === this.state.filterStatus);
-
+        const { orders, loading, message } = this.state;
         return (
-            <div className="container mt-5">
-                <h2>Order History</h2>
-                {this.state.message && <p className="text-danger">{this.state.message}</p>}
-                <div className="mb-3">
-                    <label>Filter by Status:</label>
-                    <select className="form-select" onChange={this.handleFilterChange} value={this.state.filterStatus}>
-                        <option value="all">All</option>
-                        <option value="pending">Pending</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                </div>
-                {filteredOrders.length === 0 ? (
+            <div className="container mt-4">
+                <h2>My Orders</h2>
+                {message && <div className="alert alert-info">{message}</div>}
+                {loading ? (
+                    <p>Loading...</p>
+                ) : orders.length === 0 ? (
                     <p>No orders found.</p>
                 ) : (
-                    <ul className="list-group">
-                        {filteredOrders.map((order) => (
-                            <li key={order._id} className="list-group-item">
-                                <strong>Order ID:</strong> {order._id} <br />
-                                <strong>Total:</strong> ${order.total} <br />
-                                <strong>Status:</strong> {order.status} <br />
-                                <strong>Items:</strong>
-                                <ul>
-                                    {order.items.map((item) => (
-                                        <li key={item.product._id}>
-                                            {item.product.name} - {item.quantity} pcs
-                                        </li>
-                                    ))}
-                                </ul>
-                                {order.status === "pending" && (
-                                    <button className="btn btn-danger mt-2" onClick={() => this.cancelOrder(order._id)}>
-                                        Cancel Order
-                                    </button>
-                                )}
+                    <ul>
+                        {orders.map((order) => (
+                            <li key={order._id}>
+                                Order #{order._id} - Total: ${order.total} - Status: {order.status}
                             </li>
                         ))}
                     </ul>
@@ -94,4 +57,4 @@ class Order extends Component {
     }
 }
 
-export default withRouter(Order);
+export default Orders;

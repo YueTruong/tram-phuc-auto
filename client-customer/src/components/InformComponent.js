@@ -14,7 +14,7 @@ class Inform extends Component {
                 <div className="row align-items-center">
                     <div className="col-md-8 text-start">
                         {token === '' ? (
-                            <div style={{ paddingLeft: '12px' }}>
+                            <div>
                                 <Link to='/register' className="btn">Register</Link>
                                 <span className="text-muted">|</span>
                                 <Link to='/login' className="btn">Login</Link>

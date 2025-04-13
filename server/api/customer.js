@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 //Utils
 const CryptoUtil = require('../utils/CryptoUtil');
@@ -102,15 +103,12 @@ router.post('/login', async (req, res) => {
         if (!username || !password) {
             return res.status(400).json({ success: false, message: 'Username and password required' });
         }
-
-        const hashedPassword = CryptoUtil.md5(password); // Mã hóa password
-
+        const hashedPassword = CryptoUtil.md5(password);
         const customer = await CustomerDAO.selectByUsernameAndPassword(username, hashedPassword);
         if (!customer) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
-
-        const token = JwtUtil.genToken(username, hashedPassword); // cũng nên dùng password đã mã hóa khi tạo token
+        const token = JwtUtil.genToken(username);
         res.json({ success: true, message: 'Authentication successful', token });
     } catch (error) {
         console.error("❌ Login error:", error);
@@ -202,23 +200,30 @@ router.put('/:id', async (req, res) => {
 // Middleware to verify customer token
 const verifyCustomer = async (req, res, next) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
-
+        let token = req.headers.authorization;
+        if (token && token.startsWith('Bearer ')) {
+            token = token.slice(7);
+        }
+        if (!token) {
+            console.log("No token provided");
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const decoded = JwtUtil.verifyToken(token);
         const customer = await Customer.findOne({ username: decoded.username });
-
-        if (!customer) return res.status(404).json({ message: "Customer not found" });
-
+        if (!customer) {
+            console.log("Customer not found for username:", decoded.username);
+            return res.status(404).json({ message: "Customer not found" });
+        }
         req.customer = customer;
         next();
     } catch (error) {
+        console.error("Verify error:", error);
         res.status(401).json({ message: "Invalid token" });
     }
 };
 
 // Get customer cart
-router.get("/api/customer/cart", verifyCustomer, async (req, res) => {
+router.get("/cart", verifyCustomer, async (req, res) => {
     try {
         const cart = await CartDAO.getCart(req.customer._id);
         res.json(cart || { items: [] });
@@ -228,7 +233,7 @@ router.get("/api/customer/cart", verifyCustomer, async (req, res) => {
 });
 
 // Update cart
-router.post("/api/customer/cart", verifyCustomer, async (req, res) => {
+router.post("/cart", verifyCustomer, async (req, res) => {
     try {
         const { items } = req.body;
         const updatedCart = await CartDAO.updateCart(req.customer._id, items);
@@ -239,7 +244,7 @@ router.post("/api/customer/cart", verifyCustomer, async (req, res) => {
 });
 
 // Clear cart
-router.delete("/api/customer/cart", verifyCustomer, async (req, res) => {
+router.delete("/cart", verifyCustomer, async (req, res) => {
     try {
         await CartDAO.clearCart(req.customer._id);
         res.json({ message: "Cart cleared" });
@@ -248,8 +253,8 @@ router.delete("/api/customer/cart", verifyCustomer, async (req, res) => {
     }
 });
 
-// Sync cart (new endpoint)
-router.post("/api/customer/cart/sync", verifyCustomer, async (req, res) => {
+// Sync cart
+router.post("/cart/sync", verifyCustomer, async (req, res) => {
     try {
         const { items } = req.body;
         const syncedCart = await CartDAO.syncCart(req.customer._id, items);
@@ -259,30 +264,52 @@ router.post("/api/customer/cart/sync", verifyCustomer, async (req, res) => {
     }
 });
 
-// Fix order route path (replace existing /orders and /order routes)
-router.post("/api/customer/orders", verifyCustomer, async (req, res) => {
+// Update orders route
+router.post("/orders", verifyCustomer, async (req, res) => {
     try {
         const { items, total } = req.body;
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: "Invalid or empty items" });
+        }
+        for (const item of items) {
+            if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+                return res.status(400).json({ error: `Invalid productId: ${item.productId}` });
+            }
+        }
         const newOrder = {
             _id: new mongoose.Types.ObjectId(),
             cdate: Date.now(),
             total,
             status: "Pending",
-            customer: req.customer,
+            customer: {
+                _id: req.customer._id,
+                username: req.customer.username,
+                name: req.customer.name,
+                phone: req.customer.phone,
+                email: req.customer.email,
+                active: req.customer.active,
+                token: req.customer.token
+            },
             items: items.map(item => ({
                 product: {
-                    _id: item.productId,
+                    _id: new mongoose.Types.ObjectId(item.productId),
                     name: item.name,
-                    price: item.price
+                    price: item.price,
+                    image: "",
+                    cdate: Date.now(),
+                    category: {}
                 },
                 quantity: item.quantity
             }))
         };
         const result = await OrderDAO.createOrder(newOrder);
+        if (!result) {
+            return res.status(500).json({ error: "Failed to create order" });
+        }
         res.status(201).json({ message: "Order placed successfully", order: result });
     } catch (error) {
         console.error("Order creation failed:", error);
-        res.status(500).json({ error: "Failed to place order" });
+        res.status(500).json({ error: `Failed to place order: ${error.message}` });
     }
 });
 

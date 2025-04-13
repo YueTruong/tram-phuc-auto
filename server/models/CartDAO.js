@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
 const { Cart } = require("./Models");
+const mongoose = require("mongoose");
 
 const CartDAO = {
     async getCart(customerId) {
