@@ -1,11 +1,12 @@
 import axios from "axios";
-import React, {Component} from "react";
+import React, { Component } from "react";
 import MyContext from "../contexts/MyContext";
 import withRouter from "../utils/withRouter";
 import Home from "./HomeComponent";
 
 class Login extends Component {
-    static contextType = MyContext; //Using this.context to access global state
+    static contextType = MyContext;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -14,6 +15,7 @@ class Login extends Component {
             message: '',
         };
     }
+
     render() {
         if (this.context.token === '') {
             return (
@@ -44,33 +46,36 @@ class Login extends Component {
                 </div>
             );
         }
-        return (<Home />); // Or redirect elsewhere if needed
+        return (<Home />);
     }
 
-    //Event handlers
     btnLoginClick(e) {
         e.preventDefault();
         const username = this.state.txtUsername;
         const password = this.state.txtPassword;
         if (username && password) {
-            const account = {username: username, password: password};
+            const account = { username: username, password: password };
             this.apiLogin(account);
         } else {
-            alert('Please input username and password');
+            this.setState({ message: 'Please input username and password' });
         }
     }
 
-    //APIs
     apiLogin(account) {
         axios.post('/api/customer/login', account).then((res) => {
             const result = res.data;
             if (result.success === true) {
+                console.log("Login response:", result); // Debug
                 this.context.setToken(result.token);
-                this.context.setUsername(account.username);
+                this.context.setUsername(result.customer.username);
+                this.context.setCustomer(result.customer);
                 this.props.navigate('/home');
             } else {
-                alert(result.message);
+                this.setState({ message: result.message });
             }
+        }).catch((error) => {
+            console.error("Login error:", error);
+            this.setState({ message: 'Login failed: ' + error.message });
         });
     }
 }

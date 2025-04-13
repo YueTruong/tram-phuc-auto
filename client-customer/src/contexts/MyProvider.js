@@ -23,6 +23,7 @@ class MyProvider extends Component {
 
     componentDidMount() {
         if (this.state.token) {
+            this.fetchCustomer();
             this.fetchCart();
         }
     }
@@ -31,11 +32,12 @@ class MyProvider extends Component {
         this.setState({ token: value }, async () => {
             localStorage.setItem("token", value);
             if (value) {
+                await this.fetchCustomer();
                 await this.syncCartWithBackend(this.state.mycart);
                 await this.fetchCart();
             } else {
                 localStorage.removeItem("token");
-                this.setState({ mycart: [], customer: null });
+                this.setState({ mycart: [], customer: null, username: "" });
                 localStorage.setItem("cart", JSON.stringify([]));
             }
         });
@@ -46,7 +48,29 @@ class MyProvider extends Component {
     };
 
     setCustomer = (value) => {
+        console.log("Setting customer:", value);
         this.setState({ customer: value });
+    };
+
+    fetchCustomer = async () => {
+        if (!this.state.token) {
+            console.log("No token for fetchCustomer");
+            return;
+        }
+        try {
+            const res = await axios.get("/api/customer/profile", {
+                headers: { Authorization: `Bearer ${this.state.token}` },
+            });
+            console.log("Fetch customer response:", res.data);
+            if (res.data && res.data._id) {
+                this.setCustomer(res.data);
+            } else {
+                console.log("No valid customer data, preserving existing:", this.state.customer);
+            }
+        } catch (error) {
+            console.error("Error fetching customer:", error.response?.data || error.message);
+            console.log("Preserving existing customer:", this.state.customer);
+        }
     };
 
     fetchCart = async () => {
@@ -91,7 +115,7 @@ class MyProvider extends Component {
                 const updatedCart = [...prevState.mycart];
                 const existingItem = updatedCart.find(item => item._id === product._id);
                 if (existingItem) {
-                    existingItem.quantity = quantity; // Set quantity
+                    existingItem.quantity = quantity;
                 } else {
                     updatedCart.push({ ...product, quantity, _id: product._id.toString() });
                 }
@@ -154,21 +178,12 @@ class MyProvider extends Component {
         try {
             console.log("Syncing cart:", updatedCart);
             const validCart = updatedCart.filter(item => item._id && item.quantity > 0);
-            if (validCart.length === 0) {
-                console.log("No valid items to sync");
-                await axios.post(
-                    "/api/customer/cart/sync",
-                    { items: [] },
-                    { headers: { Authorization: `Bearer ${this.state.token}` } }
-                );
-            } else {
-                const response = await axios.post(
-                    "/api/customer/cart/sync",
-                    { items: validCart },
-                    { headers: { Authorization: `Bearer ${this.state.token}` } }
-                );
-                console.log("Sync response:", response.data);
-            }
+            const response = await axios.post(
+                "/api/customer/cart/sync",
+                { items: validCart },
+                { headers: { Authorization: `Bearer ${this.state.token}` } }
+            );
+            console.log("Sync response:", response.data);
             await this.fetchCart();
         } catch (error) {
             console.error("Error syncing cart:", error.response?.data || error.message);

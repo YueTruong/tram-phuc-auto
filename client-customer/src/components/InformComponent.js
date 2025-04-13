@@ -7,7 +7,9 @@ class Inform extends Component {
 
     render() {
         const { token, customer, mycart } = this.context;
-        const totalItems = mycart ? mycart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+        const totalItems = mycart ? mycart.length : 0; // Unique items
+
+        console.log("Inform.js customer:", customer); // Debug
 
         return (
             <div className="container-fluid bg-light py-0 border-bottom w-100" style={{ marginTop: '56px' }}>
@@ -46,7 +48,7 @@ class Inform extends Component {
         this.context.setToken('');
         this.context.setUsername('');
         this.context.setCustomer(null);
-        this.context.clearCart(); // Use clearCart to sync with MongoDB
+        this.context.clearCart();
     }
 }
 

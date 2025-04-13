@@ -50,6 +50,39 @@ router.get('/products/:id', async function (req, res) {
     res.json(product);
 });
 
+// Middleware to verify customer token
+const verifyCustomer = async (req, res, next) => {
+    try {
+        let token = req.headers.authorization;
+        if (token && token.startsWith('Bearer ')) {
+            token = token.slice(7);
+        }
+        if (!token) {
+            console.log("No token provided");
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const decoded = JwtUtil.verifyToken(token);
+        console.log("Decoded token:", decoded);
+        if (!decoded.username || typeof decoded.username !== 'string') {
+            return res.status(401).json({ message: "Invalid token payload" });
+        }
+        const customer = await Customer.findOne({ username: decoded.username });
+        if (!customer) {
+            console.log("Customer not found for username:", decoded.username);
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        console.log("Customer found:", customer._id);
+        if (!mongoose.Types.ObjectId.isValid(customer._id)) {
+            return res.status(500).json({ message: "Invalid customer ID" });
+        }
+        req.customer = customer;
+        next();
+    } catch (error) {
+        console.error("Verify error:", error);
+        res.status(401).json({ message: `Invalid token: ${error.message}` });
+    }
+};
+
 // Register a new customer
 router.post('/register', async (req, res) => {
     try {
@@ -102,16 +135,23 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
         const token = JwtUtil.genToken(username);
-        res.json({ success: true, message: 'Authentication successful', token });
+        res.json({
+            success: true,
+            message: 'Authentication successful',
+            token,
+            customer: {
+                _id: customer._id,
+                username: customer.username,
+                name: customer.name,
+                phone: customer.phone,
+                email: customer.email,
+                active: customer.active
+            }
+        });
     } catch (error) {
         console.error("❌ Login error:", error);
         res.status(500).json({ success: false, message: `Internal server error: ${error.message}` });
     }
-});
-
-router.get('/token', JwtUtil.checkToken, function (req, res) {
-    const token = req.headers['x-access-token'] || req.headers['authorization'];
-    res.json({ success: true, message: 'Token is valid', token: token });
 });
 
 // Activate account
@@ -129,63 +169,51 @@ router.post('/activate', async (req, res) => {
     }
 });
 
-router.get("/me", JwtUtil.checkToken, async (req, res) => {
+// Profile route
+router.get("/profile", verifyCustomer, async (req, res) => {
     try {
-        const customer = await Customer.findOne({ username: req.user.username }).select("-password");
-        if (!customer) {
-            return res.status(404).json({ message: "Customer not found" });
-        }
-        console.log("Server response:", customer);
-        res.json(customer);
+        console.log("Fetching profile for customer:", req.customer._id);
+        res.json({
+            _id: req.customer._id,
+            username: req.customer.username,
+            name: req.customer.name,
+            phone: req.customer.phone,
+            email: req.customer.email,
+            active: req.customer.active
+        });
     } catch (error) {
-        console.error("Fetch me failed:", error);
-        res.status(500).json({ message: `Server error: ${error.message}` });
+        console.error("Fetch profile failed:", error);
+        res.status(500).json({ message: `Failed to fetch profile: ${error.message}` });
     }
 });
 
-// Get all customers
-router.get('/', async (req, res) => {
+// Profile by ID (kept for compatibility)
+router.get("/profile/:id", verifyCustomer, async (req, res) => {
     try {
-        const customers = await CustomerDAO.selectAll();
-        res.status(200).json(customers);
-    } catch (error) {
-        console.error("Fetch all customers failed:", error);
-        res.status(500).json({ message: `Failed to fetch customers: ${error.message}` });
-    }
-});
-
-// Middleware to verify customer token
-const verifyCustomer = async (req, res, next) => {
-    try {
-        let token = req.headers.authorization;
-        if (token && token.startsWith('Bearer ')) {
-            token = token.slice(7);
+        console.log("Fetching profile for id:", req.params.id);
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "Invalid customer ID" });
         }
-        if (!token) {
-            console.log("No token provided");
-            return res.status(401).json({ message: "Unauthorized" });
+        if (req.params.id !== req.customer._id.toString()) {
+            return res.status(403).json({ message: "Unauthorized access" });
         }
-        const decoded = JwtUtil.verifyToken(token);
-        console.log("Decoded token:", decoded);
-        if (!decoded.username || typeof decoded.username !== 'string') {
-            return res.status(401).json({ message: "Invalid token payload" });
-        }
-        const customer = await Customer.findOne({ username: decoded.username });
+        const customer = await CustomerDAO.selectByID(req.params.id);
         if (!customer) {
-            console.log("Customer not found for username:", decoded.username);
             return res.status(404).json({ message: "Customer not found" });
         }
-        console.log("Customer found:", customer._id);
-        if (!mongoose.Types.ObjectId.isValid(customer._id)) {
-            return res.status(500).json({ message: "Invalid customer ID" });
-        }
-        req.customer = customer;
-        next();
+        res.json({
+            _id: customer._id,
+            username: customer.username,
+            name: customer.name,
+            phone: customer.phone,
+            email: customer.email,
+            active: customer.active
+        });
     } catch (error) {
-        console.error("Verify error:", error);
-        res.status(401).json({ message: `Invalid token: ${error.message}` });
+        console.error("Fetch customer failed:", error);
+        res.status(500).json({ message: `Failed to fetch customer: ${error.message}` });
     }
-};
+});
 
 // Get customer cart
 router.get("/cart", verifyCustomer, async (req, res) => {
@@ -297,64 +325,6 @@ router.get("/orders", verifyCustomer, async (req, res) => {
     } catch (error) {
         console.error("Fetch orders failed:", error);
         res.status(500).json({ message: `Failed to fetch orders: ${error.message}` });
-    }
-});
-
-// Get customer by ID (moved below specific routes)
-router.get("/customer/:id", async (req, res) => {
-    try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: "Invalid customer ID" });
-        }
-        const customer = await CustomerDAO.selectByID(req.params.id);
-        if (!customer) {
-            return res.status(404).json({ message: "Customer not found" });
-        }
-        res.status(200).json(customer);
-    } catch (error) {
-        console.error("Fetch customer failed:", error);
-        res.status(500).json({ message: `Failed to fetch customer: ${error.message}` });
-    }
-});
-
-// Update customer
-router.put("/customer/:id", async (req, res) => {
-    try {
-        const { username, password, name, phone, email } = req.body;
-        const updatedCustomer = {
-            _id: req.params.id,
-            username,
-            password: password ? CryptoUtil.md5(password) : undefined,
-            name,
-            phone,
-            email
-        };
-        const result = await CustomerDAO.update(updatedCustomer);
-        if (!result) {
-            return res.status(400).json({ message: "Update failed" });
-        }
-        res.status(200).json({ message: "Customer updated successfully", customer: result });
-    } catch (error) {
-        console.error("Update customer failed:", error);
-        res.status(500).json({ message: `Failed to update customer: ${error.message}` });
-    }
-});
-
-// Profile route
-router.get("/profile/:id", verifyCustomer, async (req, res) => {
-    try {
-        console.log("Fetching profile for id:", req.params.id);
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: "Invalid customer ID" });
-        }
-        const customer = await CustomerDAO.selectByID(req.params.id);
-        if (!customer) {
-            return res.status(404).json({ message: "Customer not found" });
-        }
-        res.json(customer);
-    } catch (error) {
-        console.error("Fetch customer failed:", error);
-        res.status(500).json({ message: `Failed to fetch customer: ${error.message}` });
     }
 });
 

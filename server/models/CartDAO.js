@@ -90,7 +90,6 @@ const CartDAO = {
                 });
             }
             console.log("Syncing cart for customer:", customerId, "with items:", localCart);
-            // Replace server cart with localCart (handles removals and updates)
             cart.items = localCart
                 .filter(item => item._id && mongoose.Types.ObjectId.isValid(item._id))
                 .map(item => ({
