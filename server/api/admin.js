@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Utils
 const JwtUtil = require('../utils/JwtUtil');
+const EmailUtil = require('../utils/EmailUtil');
 
 // DAOs
 const AdminDAO = require('../models/AdminDAO');
@@ -10,7 +11,6 @@ const CategoryDAO = require('../models/CategoryDAO');
 const ProductDAO = require('../models/ProductDAO');
 const OrderDAO = require('../models/OrderDAO');
 const CustomerDAO = require('../models/CustomerDAO');
-const Models = require('../models/Models');
 const mongoose = require('mongoose');
 
 // Login

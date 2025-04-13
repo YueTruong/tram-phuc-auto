@@ -4,6 +4,7 @@ import MyContext from '../contexts/MyContext';
 
 class Customer extends Component {
   static contextType = MyContext;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -15,64 +16,73 @@ class Customer extends Component {
 
   render() {
     const customers = this.state.customers.map((item) => (
-      <tr key={item._id} className="border-b hover:bg-gray-100 cursor-pointer" onClick={() => this.trCustomerClick(item)}>
-        <td className="p-3">{item._id}</td>
-        <td className="p-3">{item.username}</td>
-        <td className="p-3">{item.password}</td>
-        <td className="p-3">{item.name}</td>
-        <td className="p-3">{item.email}</td>
-        <td className="p-3">{item.active ? 'Active' : 'Inactive'}</td>
-        <td className="p-3">
+      <tr key={item._id} onClick={() => this.trCustomerClick(item)}>
+        <td>{item._id}</td>
+        <td>{item.username}</td>
+        <td>{item.name}</td>
+        <td>{item.email}</td>
+        <td>{item.active ? 'Active' : 'Inactive'}</td>
+        <td>
           {item.active === 0 ? (
-            <button className="text-blue-500 hover:underline" onClick={() => this.lnkEmailClick(item)}>EMAIL</button>
+            <button
+              className="btn btn-link text-primary action-btn"
+              onClick={() => this.lnkEmailClick(item)}
+            >
+              Email
+            </button>
           ) : (
-            <button className="text-red-500 hover:underline" onClick={() => this.lnkDeactiveClick(item)}>DEACTIVE</button>
+            <button
+              className="btn btn-link text-danger action-btn"
+              onClick={() => this.lnkDeactiveClick(item)}
+            >
+              Deactivate
+            </button>
           )}
         </td>
       </tr>
     ));
 
     const orders = this.state.orders.map((item) => (
-      <tr key={item._id} className="border-b hover:bg-gray-100 cursor-pointer" onClick={() => this.trOrderClick(item)}>
-        <td className="p-3">{item._id}</td>
-        <td className="p-3">{new Date(item.cdate).toLocaleString()}</td>
-        <td className="p-3">{item.customer.name}</td>
-        <td className="p-3">{item.total}</td>
-        <td className="p-3">{item.status}</td>
+      <tr key={item._id} onClick={() => this.trOrderClick(item)}>
+        <td>{item._id}</td>
+        <td>{new Date(item.cdate).toLocaleString()}</td>
+        <td>{item.customer.name}</td>
+        <td>${item.total.toFixed(2)}</td>
+        <td>{item.status}</td>
       </tr>
     ));
 
     return (
-      <div className="content">
-        <h2 className="text-2xl font-bold text-center ">Customer List</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border rounded-lg shadow-md">
-            <thead className="bg-gray-200">
+      <div className="customer-management">
+        <h2>Customer List</h2>
+        <div className="table-responsive">
+          <table className="table table-hover customer-table">
+            <thead>
               <tr>
-                <th className="p-3">ID</th>
-                <th className="p-3">Username</th>
-                <th className="p-3">Password</th>
-                <th className="p-3">Name</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Active</th>
-                <th className="p-3">Action</th>
+                <th scope="col">ID</th>
+                <th scope="col">Username</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Active</th>
+                <th scope="col">Action</th>
               </tr>
             </thead>
             <tbody>{customers}</tbody>
           </table>
         </div>
+
         {this.state.orders.length > 0 && (
-          <div className="mt-5">
-            <h2 className="text-2xl font-bold text-center">Order List</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full border rounded-lg shadow-md">
-                <thead className="bg-gray-200">
+          <div className="mt-4">
+            <h2>Order List</h2>
+            <div className="table-responsive">
+              <table className="table table-hover order-table">
+                <thead>
                   <tr>
-                    <th className="p-3">ID</th>
-                    <th className="p-3">Creation Date</th>
-                    <th className="p-3">Customer Name</th>
-                    <th className="p-3">Total</th>
-                    <th className="p-3">Status</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Creation Date</th>
+                    <th scope="col">Customer Name</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
                   </tr>
                 </thead>
                 <tbody>{orders}</tbody>
@@ -82,36 +92,43 @@ class Customer extends Component {
         )}
 
         {this.state.order && (
-          <div className="mt-5">
-            <h2 className="text-2xl font-bold text-center mb-4">Order Detail</h2>
-            <table className="min-w-full bg-white border rounded-lg shadow-md">
-              <thead>
-                <tr className="bg-gray-200 text-gray-700">
-                  <th className="py-2 px-4">No.</th>
-                  <th className="py-2 px-4">Product ID</th>
-                  <th className="py-2 px-4">Product Name</th>
-                  <th className="py-2 px-4">Image</th>
-                  <th className="py-2 px-4">Price</th>
-                  <th className="py-2 px-4">Quantity</th>
-                  <th className="py-2 px-4">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.order.items.map((item, index) => (
-                  <tr key={item.product._id} className="border-b">
-                    <td className="py-2 px-4">{index + 1}</td>
-                    <td className="py-2 px-4">{item.product._id}</td>
-                    <td className="py-2 px-4">{item.product.name}</td>
-                    <td className="py-2 px-4">
-                      <img src={`data:image/jpg;base64,${item.product.image}`} width="50" height="50" alt={item.product.name} className="rounded" />
-                    </td>
-                    <td className="py-2 px-4">${item.product.price}</td>
-                    <td className="py-2 px-4">{item.quantity}</td>
-                    <td className="py-2 px-4">${item.product.price * item.quantity}</td>
+          <div className="mt-4">
+            <h2>Order Detail</h2>
+            <div className="table-responsive">
+              <table className="table order-detail-table">
+                <thead>
+                  <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">Product ID</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {this.state.order.items.map((item, index) => (
+                    <tr key={item.product._id}>
+                      <td>{index + 1}</td>
+                      <td>{item.product._id}</td>
+                      <td>{item.product.name}</td>
+                      <td>
+                        <img
+                          src={`data:image/jpg;base64,${item.product.image}`}
+                          width="50"
+                          height="50"
+                          alt={item.product.name}
+                        />
+                      </td>
+                      <td>${item.product.price.toFixed(2)}</td>
+                      <td>{item.quantity}</td>
+                      <td>${(item.product.price * item.quantity).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -126,12 +143,15 @@ class Customer extends Component {
     this.setState({ orders: [], order: null });
     this.apiGetOrdersByCustID(item._id);
   }
+
   trOrderClick(item) {
     this.setState({ order: item });
   }
+
   lnkDeactiveClick(item) {
     this.apiPutCustomerDeactive(item._id, item.token);
   }
+
   lnkEmailClick(item) {
     this.apiGetCustomerSendmail(item._id);
   }
@@ -140,14 +160,22 @@ class Customer extends Component {
     const config = { headers: { 'x-access-token': this.context.token } };
     axios.get('/api/admin/customers', config).then((res) => {
       this.setState({ customers: res.data });
+    }).catch((error) => {
+      console.error('Error fetching customers:', error);
+      alert('Failed to fetch customers. Please try again.');
     });
   }
+
   apiGetOrdersByCustID(cid) {
     const config = { headers: { 'x-access-token': this.context.token } };
     axios.get('/api/admin/orders/customer/' + cid, config).then((res) => {
       this.setState({ orders: res.data });
+    }).catch((error) => {
+      console.error('Error fetching orders:', error);
+      this.setState({ orders: [] });
     });
   }
+
   apiPutCustomerDeactive(id, token) {
     const body = { token: token };
     const config = { headers: { 'x-access-token': this.context.token } };
@@ -157,12 +185,19 @@ class Customer extends Component {
       } else {
         alert('Error! An error occurred. Please try again later.');
       }
+    }).catch((error) => {
+      console.error('Error deactivating customer:', error);
+      alert('Failed to deactivate customer. Please try again.');
     });
   }
+
   apiGetCustomerSendmail(id) {
     const config = { headers: { 'x-access-token': this.context.token } };
     axios.get('/api/admin/customers/sendmail/' + id, config).then((res) => {
       alert(res.data.message);
+    }).catch((error) => {
+      console.error('Error sending email:', error);
+      alert('Failed to send email. Please try again.');
     });
   }
 }
