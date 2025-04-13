@@ -76,7 +76,7 @@ class Order extends Component {
         const statusOptions = ["Pending", "Approved", "Shipped", "Delivered", "Cancelled"];
 
         return (
-            <div className="container mt-4">
+            <div className="order-container container mt-4">
                 <h2>Order Management</h2>
                 {error && <div className="alert alert-danger">{error}</div>}
                 {loading ? (
@@ -84,7 +84,7 @@ class Order extends Component {
                 ) : orders.length === 0 ? (
                     <p>No orders found.</p>
                 ) : (
-                    <table className="table table-bordered">
+                    <table className="order-table table table-bordered">
                         <thead className="table-light">
                             <tr>
                                 <th>Order ID</th>

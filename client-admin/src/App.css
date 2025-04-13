@@ -147,10 +147,97 @@ tr:not(:first-child):hover.datatable {
   color: #dc3545 !important;
 }
 
+/* OrderComponent.css */
+.order-container {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.order-container h2 {
+  margin-bottom: 20px;
+  color: #343a40;
+}
+
+.order-table th, .order-table td {
+  vertical-align: middle;
+}
+
+.order-table th {
+  background-color: #343a40;
+  color: #ffffff;
+}
+
+.order-table tr:hover {
+  background-color: #f1f3f5;
+}
+
+.order-table .form-select {
+  min-width: 120px;
+}
+
+.order-table .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.order-table .btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+.alert {
+  margin-bottom: 20px;
+}
+
+/* CustomerComponent.css */
+.customer-management {
+  padding: 20px;
+}
+
+.customer-management h2 {
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.table-responsive {
+  margin-bottom: 30px;
+}
+
+.customer-table tbody tr:hover,
+.order-table tbody tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+.order-detail-table img {
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.action-btn {
+  padding: 0;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  text-decoration: underline;
+}
+
+.mt-4 {
+  margin-top: 2rem !important;
+}
+
 /* FooterComponent.css */
 .admin-footer {
   background-color: #212529;
   color: #ffffff;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-top: 20px;
 }
 
 .admin-footer a:hover {

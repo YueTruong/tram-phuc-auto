@@ -194,10 +194,14 @@ class Customer extends Component {
   apiGetCustomerSendmail(id) {
     const config = { headers: { 'x-access-token': this.context.token } };
     axios.get('/api/admin/customers/sendmail/' + id, config).then((res) => {
-      alert(res.data.message);
+      if (res.data) {
+        alert('Verification email sent successfully.');
+      } else {
+        alert('Error! Could not send verification email.');
+      }
     }).catch((error) => {
-      console.error('Error sending email:', error);
-      alert('Failed to send email. Please try again.');
+      console.error('Error sending verification email:', error);
+      alert('Failed to send verification email. Please try again.');
     });
   }
 }
