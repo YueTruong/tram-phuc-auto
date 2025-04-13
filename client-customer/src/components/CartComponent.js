@@ -77,7 +77,10 @@ class Cart extends Component {
                                         </td>
                                         <td className="fw-bold">${(item.price * item.quantity).toFixed(2)}</td>
                                         <td>
-                                            <button className="btn btn-sm btn-danger" onClick={() => removeFromCart(item._id)}>
+                                            <button
+                                                className="btn btn-sm btn-danger"
+                                                onClick={() => removeFromCart(item._id)}
+                                            >
                                                 Remove
                                             </button>
                                         </td>
@@ -89,7 +92,10 @@ class Cart extends Component {
                             <h5>Total:</h5>
                             <h5 className="fw-bold text-success">${totalPrice.toFixed(2)}</h5>
                         </div>
-                        <button className="btn btn-primary mt-3 w-100" onClick={this.handleProceedToCheckout}>
+                        <button
+                            className="btn btn-primary mt-3 w-100"
+                            onClick={this.handleProceedToCheckout}
+                        >
                             Proceed to Checkout
                         </button>
                     </div>

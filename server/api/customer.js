@@ -214,8 +214,12 @@ router.post("/cart", verifyCustomer, async (req, res) => {
 // Clear cart
 router.delete("/cart", verifyCustomer, async (req, res) => {
     try {
-        await CartDAO.clearCart(req.customer._id);
-        res.json({ message: "Cart cleared" });
+        const result = await CartDAO.clearCart(req.customer._id);
+        if (result) {
+            res.json({ message: "Cart cleared successfully" });
+        } else {
+            res.status(404).json({ message: "Cart not found" });
+        }
     } catch (error) {
         console.error("Clear cart failed:", error);
         res.status(500).json({ message: `Failed to clear cart: ${error.message}` });
@@ -226,8 +230,9 @@ router.delete("/cart", verifyCustomer, async (req, res) => {
 router.post("/cart/sync", verifyCustomer, async (req, res) => {
     try {
         const { items } = req.body;
+        console.log("Received sync items for customer:", req.customer._id, "Items:", items);
         const syncedCart = await CartDAO.syncCart(req.customer._id, items);
-        res.json(syncedCart);
+        res.json(syncedCart || { items: [] });
     } catch (error) {
         console.error("Sync cart failed:", error);
         res.status(500).json({ message: `Failed to sync cart: ${error.message}` });

@@ -4,15 +4,25 @@ const mongoose = require("mongoose");
 const CartDAO = {
     async getCart(customerId) {
         try {
-            return await Cart.findOne({ "customer._id": customerId });
+            if (!mongoose.Types.ObjectId.isValid(customerId)) {
+                console.error("Invalid customerId for getCart:", customerId);
+                return { items: [] };
+            }
+            const cart = await Cart.findOne({ "customer._id": customerId });
+            console.log("Fetched cart for customer:", customerId, "Cart:", cart);
+            return cart || { items: [] };
         } catch (error) {
             console.error("❌ Error fetching cart:", error);
-            return null;
+            return { items: [] };
         }
     },
 
     async updateCart(customerId, items) {
         try {
+            if (!mongoose.Types.ObjectId.isValid(customerId)) {
+                console.error("Invalid customerId for updateCart:", customerId);
+                return { items: [] };
+            }
             let cart = await Cart.findOne({ "customer._id": customerId });
             if (!cart) {
                 cart = new Cart({
@@ -22,35 +32,54 @@ const CartDAO = {
                     cdate: Date.now()
                 });
             }
-            cart.items = items.map(item => ({
-                product: { 
-                    _id: item._id,
-                    name: item.name,
-                    price: item.price,
-                    image: item.image,
-                    cdate: item.cdate,
-                    category: item.category
-                },
-                quantity: item.quantity
-            }));
-            return await cart.save();
+            console.log("Updating cart for customer:", customerId, "with items:", items);
+            cart.items = items
+                .filter(item => item._id && mongoose.Types.ObjectId.isValid(item._id))
+                .map(item => ({
+                    product: {
+                        _id: item._id,
+                        name: item.name || "Unknown",
+                        price: item.price || 0,
+                        image: item.image || "",
+                        cdate: item.cdate || new Date(),
+                        category: item.category || {}
+                    },
+                    quantity: item.quantity || 1
+                }));
+            const savedCart = await cart.save();
+            console.log("Updated cart:", savedCart);
+            return savedCart;
         } catch (error) {
             console.error("❌ Error updating cart:", error);
-            return null;
+            return { items: [] };
         }
     },
 
     async clearCart(customerId) {
         try {
-            return await Cart.deleteOne({ "customer._id": customerId });
+            if (!mongoose.Types.ObjectId.isValid(customerId)) {
+                console.error("Invalid customerId for clearCart:", customerId);
+                return false;
+            }
+            const result = await Cart.findOneAndUpdate(
+                { "customer._id": customerId },
+                { items: [] },
+                { new: true }
+            );
+            console.log("Cleared cart for customer:", customerId, "Result:", result);
+            return true;
         } catch (error) {
             console.error("❌ Error clearing cart:", error);
-            return null;
+            return false;
         }
     },
 
     async syncCart(customerId, localCart) {
         try {
+            if (!mongoose.Types.ObjectId.isValid(customerId)) {
+                console.error("Invalid customerId for syncCart:", customerId);
+                return { items: [] };
+            }
             let cart = await Cart.findOne({ "customer._id": customerId });
             if (!cart) {
                 cart = new Cart({
@@ -60,39 +89,27 @@ const CartDAO = {
                     cdate: Date.now()
                 });
             }
-            // Merge localCart with existing cart
-            const existingItems = cart.items.reduce((map, item) => {
-                map[item.product._id.toString()] = item.quantity;
-                return map;
-            }, {});
-            for (const item of localCart) {
-                const productId = item._id;
-                const quantity = item.quantity;
-                if (existingItems[productId]) {
-                    existingItems[productId] += quantity; // Sum quantities
-                } else {
-                    cart.items.push({
-                        product: {
-                            _id: productId,
-                            name: item.name,
-                            price: item.price,
-                            image: item.image,
-                            cdate: item.cdate,
-                            category: item.category
-                        },
-                        quantity
-                    });
-                }
-            }
-            // Update quantities for existing items
-            cart.items = cart.items.map(item => ({
-                product: item.product,
-                quantity: existingItems[item.product._id.toString()] || item.quantity
-            }));
-            return await cart.save();
+            console.log("Syncing cart for customer:", customerId, "with items:", localCart);
+            // Replace server cart with localCart (handles removals and updates)
+            cart.items = localCart
+                .filter(item => item._id && mongoose.Types.ObjectId.isValid(item._id))
+                .map(item => ({
+                    product: {
+                        _id: item._id,
+                        name: item.name || "Unknown",
+                        price: item.price || 0,
+                        image: item.image || "",
+                        cdate: item.cdate || new Date(),
+                        category: item.category || {}
+                    },
+                    quantity: item.quantity || 1
+                }));
+            const savedCart = await cart.save();
+            console.log("Synced cart:", savedCart);
+            return savedCart;
         } catch (error) {
             console.error("❌ Error syncing cart:", error);
-            return null;
+            return { items: [] };
         }
     }
 };
