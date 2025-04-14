@@ -44,7 +44,7 @@ span.link {
   text-decoration: underline;
 }
 
-/* menu.css */
+/* Menu */
 div.border-bottom {
   border-bottom: 1px solid black;
   padding: 10px 0px 10px 0px;
@@ -108,27 +108,35 @@ tr:not(:first-child):hover.datatable {
   cursor: pointer;
 }
 
-/* MenuComponent.css */
 .custom-navbar {
   background-color: #212529;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #ffc107;
 }
 
 .custom-navbar .nav-link {
-  color: #ffffff;
-  transition: color 0.3s, background-color 0.3s;
+  color: #f8f9fa;
+  transition: all 0.3s ease;
+  padding: 8px 15px;
+  font-weight: 500;
+  border-radius: 4px;
 }
 
-.custom-navbar .nav-link:hover {
-  color: #ffc107;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link.active {
+  color: #212529;
+  background-color: #ffc107;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+  transform: translateY(-1px);
 }
 
 .custom-navbar .navbar-brand {
   color: #ffffff;
-  font-weight: bold;
+  font-weight: 700;
   letter-spacing: 1px;
+  font-size: 1.3rem;
+  text-transform: uppercase;
 }
 
 .custom-navbar .navbar-brand:hover {
@@ -137,6 +145,9 @@ tr:not(:first-child):hover.datatable {
 
 .custom-navbar .navbar-text {
   color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .custom-navbar .navbar-text b {
@@ -145,9 +156,29 @@ tr:not(:first-child):hover.datatable {
 
 .custom-navbar .text-danger {
   color: #dc3545 !important;
+  transition: color 0.3s;
 }
 
-/* OrderComponent.css */
+.custom-navbar .text-danger:hover {
+  color: #ff6b6b !important;
+  text-decoration: underline;
+}
+
+.navbar-toggler {
+  border-color: #ffc107;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28 255, 193, 7, 0.8 %29)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 991.98px) {
+  .custom-navbar .navbar-text {
+    margin-top: 0.75rem;
+  }
+}
+
+/* OrderComponent */
 .order-container {
   background-color: #f8f9fa;
   padding: 20px;
@@ -191,7 +222,7 @@ tr:not(:first-child):hover.datatable {
   margin-bottom: 20px;
 }
 
-/* CustomerComponent.css */
+/* CustomerComponent */
 .customer-management {
   padding: 20px;
 }
@@ -231,13 +262,30 @@ tr:not(:first-child):hover.datatable {
   margin-top: 2rem !important;
 }
 
-/* FooterComponent.css */
+/* FooterComponent */
 .admin-footer {
   background-color: #212529;
   color: #ffffff;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  margin-top: 20px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  border-top: 3px solid #ffc107;
+}
+
+.admin-footer h5 {
+  color: #ffc107;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.admin-footer p {
+  margin-bottom: 0.5rem;
+  color: #dddddd;
+}
+
+.admin-footer a {
+  color: #dddddd;
+  text-decoration: none;
+  transition: color 0.3s, text-decoration 0.3s;
 }
 
 .admin-footer a:hover {
@@ -245,14 +293,22 @@ tr:not(:first-child):hover.datatable {
   text-decoration: underline;
 }
 
-.admin-footer h5 {
-  font-weight: bold;
-}
-
-.admin-footer p {
-  margin-bottom: 0;
+.admin-footer .list-unstyled {
+  padding-left: 0;
+  list-style: none;
 }
 
 .admin-footer .border-top {
   border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.admin-footer .text-center p {
+  margin: 0;
+  color: #aaaaaa;
+}
+
+@media (max-width: 768px) {
+  .admin-footer .row {
+    text-align: center;
+  }
 }

@@ -291,6 +291,40 @@ body {
   text-align: center;
 }
 
+/* Order */
+.order-container {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.order-title {
+  color: #0d6efd;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.order-table th,
+.order-table td {
+  vertical-align: middle;
+}
+
+.order-table ul {
+  padding-left: 1rem;
+}
+
+.order-table .badge {
+  padding: 0.5em 0.75em;
+  font-size: 0.9em;
+  border-radius: 6px;
+}
+
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 /* Footer */
 .customer-footer {
   background-color: #0056b3;

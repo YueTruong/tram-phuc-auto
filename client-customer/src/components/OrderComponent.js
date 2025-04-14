@@ -48,44 +48,55 @@ class Order extends Component {
         const { orders, loading, error } = this.state;
 
         return (
-            <div className="container mt-4">
-                <h2>My Orders</h2>
+            <div className="container mt-5 order-container">
+                <h2 className="text-center mb-4 order-title">My Orders</h2>
                 {error && <div className="alert alert-danger">{error}</div>}
                 {loading ? (
-                    <p>Loading orders...</p>
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p className="mt-2">Loading orders...</p>
+                    </div>
                 ) : orders.length === 0 ? (
-                    <p>No orders found.</p>
+                    <p className="text-center text-muted">No orders found.</p>
                 ) : (
-                    <table className="table table-bordered">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Date</th>
-                                <th>Total Price</th>
-                                <th>Status</th>
-                                <th>Items</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orders.map((order) => (
-                                <tr key={order._id}>
-                                    <td>{order._id}</td>
-                                    <td>{new Date(order.cdate).toLocaleDateString()}</td>
-                                    <td>${order.total.toFixed(2)}</td>
-                                    <td>{order.status}</td>
-                                    <td>
-                                        <ul>
-                                            {order.items.map((item, index) => (
-                                                <li key={index}>
-                                                    {item.product?.name || "Unknown"} - {item.quantity} x ${item.product?.price?.toFixed(2) || "0.00"}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </td>
+                    <div className="table-responsive">
+                        <table className="table table-hover table-bordered align-middle text-center order-table">
+                            <thead className="table-primary">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                    <th>Items</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {orders.map((order) => (
+                                    <tr key={order._id}>
+                                        <td>{order._id}</td>
+                                        <td>{new Date(order.cdate).toLocaleDateString()}</td>
+                                        <td>${order.total.toFixed(2)}</td>
+                                        <td>
+                                            <span className={`badge ${order.status === "Pending" ? "bg-warning" : "bg-success"}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td className="text-start">
+                                            <ul className="list-unstyled mb-0">
+                                                {order.items.map((item, index) => (
+                                                    <li key={index}>
+                                                        <strong>{item.product?.name || "Unknown"}</strong> - {item.quantity} × ${item.product?.price?.toFixed(2) || "0.00"}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
         );
